@@ -70,20 +70,34 @@ export default function Header()  : JSX.Element {
             >
               Inicio
             </Link>
-            <Link
-              href="/login"
-              className="hover:text-teal-400 transition hover:scale-105"
-              onClick={() => setOpen(false)}
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="hover:text-teal-400 transition hover:scale-105"
-              onClick={() => setOpen(false)}
-            >
-              Registro
-            </Link>
+            {!isLoggedIn ? (
+              <>
+                <Link
+                  href="/login"
+                  className="hover:text-teal-400 transition hover:scale-105"
+                  onClick={() => setOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="hover:text-teal-400 transition hover:scale-105"
+                  onClick={() => setOpen(false)}
+                >
+                  Registro
+                </Link>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  logout();
+                  setOpen(false);
+                }}
+                className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-sm font-semibold shadow transition"
+              >
+                Cerrar sesión
+              </button>
+            )}
           </nav>
         )}
       </header>
