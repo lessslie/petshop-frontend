@@ -83,7 +83,7 @@ export default function ReservaTurnoPage() {
     setSuccess('');
     console.log('Datos enviados al backend:', { ...form, date: selectedDate, time: selectedSlot });
     try {
-      const res = await fetch('http://localhost:3001/turnos/appointment', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos/appointment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
