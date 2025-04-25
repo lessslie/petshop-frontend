@@ -47,7 +47,7 @@ function ReservaTurnoPage() {
   useEffect(() => {
     if (selectedDate) {
       setLoadingSlots(true);
-      fetch(`http://localhost:3001/turnos/available-slots/${selectedDate}`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos/available-slots/${selectedDate}`)
         .then(res => res.json())
         .then(slots => {
           setAvailableSlots(slots);
