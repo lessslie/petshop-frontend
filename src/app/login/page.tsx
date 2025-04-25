@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '../../components/Button';
 import { useUser } from '../../context/UserContext';
+import Link from 'next/link';
 
 export default function LoginPage() {
   // Estado para cada campo
@@ -47,7 +48,7 @@ export default function LoginPage() {
       } else {
         setError('No se recibió token del servidor');
       }
-    } catch (err) {
+    } catch {
       setError('Error de conexión con el servidor');
     }
   }
@@ -85,7 +86,7 @@ export default function LoginPage() {
         </div>
         <Button type="submit" className="w-full mt-2">Iniciar sesión</Button>
         <p className="text-sm text-center mt-2">
-          ¿No tienes cuenta? <a href="/register" className="text-teal-600 hover:underline">Regístrate</a>
+          ¿No tienes cuenta? <Link href="/register" className="text-teal-600 hover:underline">Regístrate</Link>
         </p>
       </form>
     </main>

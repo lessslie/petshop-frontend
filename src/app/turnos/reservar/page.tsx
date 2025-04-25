@@ -1,13 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useUser } from '../../../context/UserContext';
+import { Suspense } from 'react';
 
 const getNextTwoWeeksWeekdays = () => {
   const days = [];
   const today = new Date();
-  let d = new Date(today);
+  const d = new Date(today);
   while (days.length < 10) {
     if (d.getDay() > 0 && d.getDay() < 6) {
       days.push(new Date(d));
@@ -17,8 +18,15 @@ const getNextTwoWeeksWeekdays = () => {
   return days;
 };
 
-export default function ReservaTurnoPage() {
-  const router = useRouter();
+export default function PageWrapper() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <ReservaTurnoPage />
+    </Suspense>
+  );
+}
+
+function ReservaTurnoPage() {
   const searchParams = useSearchParams();
   const { userId, isLoggedIn } = useUser();
   const [selectedDate, setSelectedDate] = useState<string>('');
@@ -32,7 +40,6 @@ export default function ReservaTurnoPage() {
     serviceType: searchParams.get('servicio') || '',
     userId: userId || '',
   });
-  const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
   const weekDays = getNextTwoWeeksWeekdays();
@@ -64,7 +71,6 @@ export default function ReservaTurnoPage() {
     setSelectedDate(date.toISOString().slice(0, 10));
     setStep('select-hour');
     setSelectedSlot('');
-    setSuccess('');
     setError('');
   };
 
@@ -73,14 +79,16 @@ export default function ReservaTurnoPage() {
     setStep('form');
   };
 
-  const handleFormChange = (e: any) => {
+  // Cambia el tipo del handler para aceptar input y select
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
     console.log('Datos enviados al backend:', { ...form, date: selectedDate, time: selectedSlot });
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos/appointment`, {
@@ -97,7 +105,6 @@ export default function ReservaTurnoPage() {
         setError(data.message || 'Error al reservar turno');
         return;
       }
-      setSuccess('¡Turno reservado exitosamente!');
       setStep('done');
     } catch {
       setError('Error de red');
@@ -151,7 +158,7 @@ export default function ReservaTurnoPage() {
           ) : (
             <div className="flex gap-3 flex-wrap justify-center">
               {availableSlots
-                .filter((_, i, arr) => {
+                .filter((_, i) => {
                   // Mostrar solo slots cada 1:30hs (el backend ya filtra ocupados)
                   // Mostrar el primer slot y luego saltar 3 (0, 3, 6...)
                   return i % 3 === 0;

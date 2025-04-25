@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
+import Link from 'next/link';
+import { JSX } from 'react';
 
-export default function Header() {
+export default function Header()  : JSX.Element {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -28,15 +30,15 @@ export default function Header() {
   return (
     <>
       <header className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-        <a href="/" className="font-bold text-2xl tracking-wide flex items-center gap-2">
+        <Link href="/" className="font-bold text-2xl tracking-wide flex items-center gap-2">
           <span role="img" aria-label="huella">🐾</span> Pelu PetShop
-        </a>
+        </Link>
         <nav className="hidden md:flex gap-8 items-center">
-          <a href="/" className="hover:text-pink-400 transition hover:scale-105">Inicio</a>
+          <Link href="/" className="hover:text-pink-400 transition hover:scale-105">Inicio</Link>
           {!isLoggedIn && (
             <>
-              <a href="/login" className="hover:text-teal-400 transition hover:scale-105">Login</a>
-              <a href="/register" className="hover:text-teal-400 transition hover:scale-105">Registro</a>
+              <Link href="/login" className="hover:text-teal-400 transition hover:scale-105">Login</Link>
+              <Link href="/register" className="hover:text-teal-400 transition hover:scale-105">Registro</Link>
             </>
           )} {isLoggedIn && (
             <button
@@ -61,27 +63,27 @@ export default function Header() {
             ref={menuRef}
             className="absolute top-20 right-6 bg-slate-900 bg-opacity-45 backdrop-blur rounded-xl shadow-lg flex flex-col gap-4 p-5 z-50 w-48 animate-fade-in"
           >
-            <a
+            <Link
               href="/"
               className="hover:text-pink-400 transition hover:scale-105"
               onClick={() => setOpen(false)}
             >
               Inicio
-            </a>
-            <a
+            </Link>
+            <Link
               href="/login"
               className="hover:text-teal-400 transition hover:scale-105"
               onClick={() => setOpen(false)}
             >
               Login
-            </a>
-            <a
+            </Link>
+            <Link
               href="/register"
               className="hover:text-teal-400 transition hover:scale-105"
               onClick={() => setOpen(false)}
             >
               Registro
-            </a>
+            </Link>
           </nav>
         )}
       </header>
@@ -98,13 +100,13 @@ export default function Header() {
   );
 }
 
-const navLinkStyle = {
-  color: '#fff',
-  textDecoration: 'none',
-  fontWeight: 500,
-  fontSize: 18,
-  padding: '6px 12px',
-  borderRadius: 6,
-  transition: 'background 0.2s',
-  background: 'none'
-};
+// const navLinkStyle = {
+//   color: '#fff',
+//   textDecoration: 'none',
+//   fontWeight: 500,
+//   fontSize: 18,
+//   padding: '6px 12px',
+//   borderRadius: 6,
+//   transition: 'background 0.2s',
+//   background: 'none'
+// };

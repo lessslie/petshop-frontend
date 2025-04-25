@@ -43,10 +43,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (token) {
       try {
-        const payload = jwtDecode<any>(token);
+        const payload = jwtDecode<{ userId: string }>(token);
         console.log('Payload JWT:', payload);
-      } catch (e) {
-        console.log('Error decodificando JWT:', e);
+      } catch {
+        console.log('Error decodificando JWT:');
       }
     }
   }, [token]);
