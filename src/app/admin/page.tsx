@@ -1,26 +1,17 @@
 'use client';
 
-import { useUser } from '../../context/UserContext';
+import { useUserContext } from '../../context/UserContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-
-type Turno = {
-  userName: string;
-  dogName: string;
-  date: string;
-  time: string;
-  id: string;
-  // ...otros campos
-};
+import { useEffect } from 'react';
 
 export default function AdminDashboard() {
-  const { role, token, isLoggedIn } = useUser();
+  const { user } = useUserContext();
+  const isLoggedIn = !!user;
+  const role = user?.role || null;
   const router = useRouter();
-  const [turnos, setTurnos] = useState<Turno[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filtroFecha, setFiltroFecha] = useState('');
-  const [mensaje, setMensaje] = useState('');
-  const [error, setError] = useState('');
+
+  // Log temporal para depuración
+  console.log('user:', user);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -28,107 +19,41 @@ export default function AdminDashboard() {
       router.push('/dashboard');
       return;
     }
-    // Fetch de todos los turnos (solo admin)
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setTurnos(data);
-          setError('');
-        } else {
-          setTurnos([]);
-          setError(typeof data === 'object' && data.message ? data.message : 'Error inesperado al obtener los turnos.');
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setTurnos([]);
-        setError('Error de red al obtener los turnos.');
-        setLoading(false);
-      });
-  }, [isLoggedIn, role, token, router]);
+  }, [isLoggedIn, role, router]);
 
   if (!isLoggedIn || role !== 'admin') return null;
 
-  // Filtra los turnos por fecha (YYYY-MM-DD)
-  const turnosFiltrados = filtroFecha
-    ? turnos.filter(turno => turno.date.startsWith(filtroFecha))
-    : turnos;
-
-  // Función para eliminar turno
-  const eliminarTurno = async (turnoId: string) => {
-    if (!confirm('¿Estás seguro de eliminar este turno?')) return;
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos/${turnoId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (res.ok) {
-        setTurnos(turnos => turnos.filter(t => t.id !== turnoId));
-        setMensaje('Turno eliminado correctamente.');
-        setTimeout(() => setMensaje(''), 2500);
-      } else {
-        setMensaje('Error al eliminar el turno.');
-        setTimeout(() => setMensaje(''), 2500);
-      }
-    } catch {
-      setMensaje('Error de red al eliminar el turno.');
-      setTimeout(() => setMensaje(''), 2500);
-    }
-  };
-
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Panel de Administración</h1>
-      {error && <div className="mb-2 text-red-600 font-semibold">{error}</div>}
-      {mensaje && <div className="mb-2 text-green-600 font-semibold">{mensaje}</div>}
-      {/* Filtro de fecha */}
-      <input
-        type="date"
-        value={filtroFecha}
-        onChange={e => setFiltroFecha(e.target.value)}
-        className="mb-4 p-2 border rounded"
-        placeholder="Filtrar por fecha"
-      />
-      {loading ? (
-        <p>Cargando turnos...</p>
-      ) : (
-        <table className="min-w-full border">
-          <thead>
-            <tr>
-              <th className="border px-2">Cliente</th>
-              <th className="border px-2">Mascota</th>
-              <th className="border px-2">Fecha</th>
-              <th className="border px-2">Hora</th>
-              <th className="border px-2">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {turnosFiltrados.map((turno, i) => (
-              <tr key={i}>
-                <td className="border px-2">{turno.userName}</td>
-                <td className="border px-2">{turno.dogName}</td>
-                <td className="border px-2">{turno.date}</td>
-                <td className="border px-2">{turno.time}</td>
-                <td className="border px-2">
-                  <button
-                    className="bg-red-500 text-white px-2 py-1 rounded"
-                    onClick={() => eliminarTurno(turno.id)}
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-8 text-center text-teal-700">
+        Panel de Administración
+      </h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        {/* Card Turnos */}
+        <a href="/admin/turnos" className="bg-white shadow-lg rounded-xl p-8 flex flex-col items-center hover:bg-teal-50 transition cursor-pointer border border-teal-200">
+          <span className="text-5xl mb-2">🗓️</span>
+          <span className="text-xl font-semibold mb-1">Turnos</span>
+          <span className="text-gray-500 text-center">Gestiona turnos y clientes</span>
+        </a>
+        {/* Card Alimentos */}
+        <a href="/admin/alimentos" className="bg-white shadow-lg rounded-xl p-8 flex flex-col items-center hover:bg-teal-50 transition cursor-pointer border border-teal-200">
+          <span className="text-5xl mb-2">🍖</span>
+          <span className="text-xl font-semibold mb-1">Alimentos</span>
+          <span className="text-gray-500 text-center">Gestiona productos de alimentos</span>
+        </a>
+        {/* Card Ropa */}
+        <a href="/admin/ropa" className="bg-white shadow-lg rounded-xl p-8 flex flex-col items-center hover:bg-teal-50 transition cursor-pointer border border-teal-200">
+          <span className="text-5xl mb-2">👗</span>
+          <span className="text-xl font-semibold mb-1">Ropa</span>
+          <span className="text-gray-500 text-center">Gestiona productos de ropa</span>
+        </a>
+        {/* Card Juguetes */}
+        <a href="/admin/juguetes" className="bg-white shadow-lg rounded-xl p-8 flex flex-col items-center hover:bg-teal-50 transition cursor-pointer border border-teal-200">
+          <span className="text-5xl mb-2">🧸</span>
+          <span className="text-xl font-semibold mb-1">Juguetes</span>
+          <span className="text-gray-500 text-center">Gestiona productos de juguetes</span>
+        </a>
+      </div>
     </div>
   );
 }

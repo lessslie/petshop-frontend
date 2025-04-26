@@ -1,20 +1,31 @@
 'use client';
+import  { jwtDecode } from 'jwt-decode';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '../../components/Button';
-import { useUser } from '../../context/UserContext';
+import { useUserContext } from '../../context/UserContext';
 import Link from 'next/link';
+
+// Define el tipo correcto para tu payload JWT
+type MyJwtPayload = {
+  name?: string;
+  email: string;
+  role: string;
+  [key: string]: string | undefined;
+};
 
 export default function LoginPage() {
   // Estado para cada campo
   const [form, setForm] = useState({
     email: '',
     password: '',
+
   });
 
   // Estado para mensajes
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
 
   const router = useRouter();
 
@@ -24,34 +35,45 @@ export default function LoginPage() {
   }
 
   // Maneja el submit
-  const { login } = useUser();
+  const { setUser } = useUserContext();
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || 'Error al iniciar sesión');
-        return;
-      }
-      if (data.access_token) {
-        login(data.access_token);
-        router.push('/'); // Redirige al inicio
-        setSuccess('¡Login exitoso!');
-      } else {
-        setError('No se recibió token del servidor');
-      }
-    } catch {
-      setError('Error de conexión con el servidor');
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  setError('');
+  setSuccess('');
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    });
+    if (!res.ok) {
+      setError('Credenciales incorrectas');
+      return;
     }
+    const data = await res.json();
+    // Guarda el token si lo necesitas
+    localStorage.setItem('token', data.access_token);
+    
+    // Decodifica el token para extraer datos del usuario
+    const decoded = jwtDecode<MyJwtPayload>(data.access_token);
+
+    setUser({
+      name: decoded.name || '',
+      email: decoded.email,
+      role: decoded.role,
+    });
+    setSuccess('¡Login exitoso!');
+    // Redirige según el rol
+    if (decoded.role === 'admin') {
+      router.push('/admin');
+    } else {
+      router.push('/dashboard');
+    }
+  } catch {
+    setError('Error de red');
   }
+}
   return (
     <main className="min-h-[70vh] flex items-center justify-center bg-slate-50">
       <form className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col gap-5" onSubmit={handleSubmit}>

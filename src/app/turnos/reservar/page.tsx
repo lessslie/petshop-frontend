@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useUser } from '../../../context/UserContext';
+import { useUserContext } from '@/context/UserContext';
 import { Suspense } from 'react';
 
 const getNextTwoWeeksWeekdays = () => {
@@ -28,7 +28,9 @@ export default function PageWrapper() {
 
 function ReservaTurnoPage() {
   const searchParams = useSearchParams();
-  const { userId, isLoggedIn } = useUser();
+  const { user } = useUserContext();
+  const userId = user?.userId || '';
+  const isLoggedIn = !!user;
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -89,7 +91,6 @@ function ReservaTurnoPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
-    console.log('Datos enviados al backend:', { ...form, date: selectedDate, time: selectedSlot });
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos/appointment`, {
         method: 'POST',
@@ -105,7 +106,13 @@ function ReservaTurnoPage() {
         setError(data.message || 'Error al reservar turno');
         return;
       }
-      setStep('done');
+      // Lógica para redirigir al pago si el turno se creó correctamente
+      // Suponiendo que el backend retorna el turno creado con su id
+      if (data && data.id) {
+        window.location.href = `/turnos/pagar/${data.id}`;
+      } else {
+        setStep('done');
+      }
     } catch {
       setError('Error de red');
     }
@@ -213,7 +220,6 @@ function ReservaTurnoPage() {
         <div className="bg-white rounded-xl shadow-md border border-gray-200 p-8 flex flex-col items-center">
           <h2 className="text-lg font-semibold text-gray-700 mb-2">¡Turno reservado!</h2>
           <p className="text-gray-600 mb-4">Recibirás una confirmación por email.</p>
-          <Link href="/" className="px-5 py-2 bg-blue-100 text-blue-700 rounded-lg font-semibold shadow hover:bg-blue-300 hover:text-blue-900 transition">Volver al inicio</Link>
         </div>
       )}
     </main>

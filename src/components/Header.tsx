@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useUser } from '../context/UserContext';
+import { useUserContext } from '../context/UserContext';
 import Link from 'next/link';
 import { JSX } from 'react';
 
@@ -9,7 +9,9 @@ export default function Header()  : JSX.Element {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { isLoggedIn, logout, role } = useUser();
+  const { user, logout } = useUserContext();
+  const isLoggedIn = !!user;
+  const role = user?.role || null;
 
   useEffect(() => {
     if (!open) return;

@@ -4,7 +4,7 @@ import Link from 'next/link';
 export default function BanoCortePage() {
   return (
     <main className="min-h-[80vh] flex flex-col items-center justify-center bg-gray-50 py-10">
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">Baño y Corte para Perros</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-4">Bañooo y Corte para Perros</h1>
       <p className="text-lg text-gray-600 mb-8 max-w-2xl text-center">
         Servicio completo de baño y corte profesional para perros grandes, medianos y chicos.
         <br />

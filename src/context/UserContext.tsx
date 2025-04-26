@@ -1,83 +1,63 @@
 'use client';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { jwtDecode } from "jwt-decode";
 
-type UserContextType = {
-  token: string | null;
-  isLoggedIn: boolean;
-  userId: string | null;
-  role: string | null;
-  login: (token: string) => void;
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { jwtDecode } from 'jwt-decode';
+
+interface User {
+  name?: string;
+  email?: string;
+  role?: string;
+  userId?: string;
+}
+
+interface UserContextType {
+  user: User | null;
+  setUser: (user: User | null) => void;
   logout: () => void;
-};
+}
 
-type JwtPayload = {
-  sub: string; 
-  userId: string;
-  role: string;
-};
+export const UserContext = createContext<UserContextType | undefined>(undefined);
 
-const UserContext = createContext<UserContextType>({
-  token: null,
-  isLoggedIn: false,
-  userId: null,
-  role: null,
+export function UserProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
 
-  login: () => {},
-  logout: () => {},
-});
-
-export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  
-      
-  
-  // Cargar token de localStorage al iniciar
+  // Hidrata el contexto desde localStorage al montar
   useEffect(() => {
-    const stored = localStorage.getItem('token');
-    if (stored) setToken(stored);
-  }, []);
-
-  // Guardar token en localStorage cuando cambia
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
-    } else {
-      localStorage.removeItem('token');
-    }
-  }, [token]);
-  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (token) {
       try {
-        const payload = jwtDecode<{ userId: string }>(token);
-        console.log('Payload JWT:', payload);
+        const decoded = jwtDecode<{ name?: string; email?: string; role?: string; userId?: string }>(token);
+        setUser({
+          name: decoded.name || '',
+          email: decoded.email,
+          role: decoded.role,
+          userId: decoded.userId,
+        });
       } catch {
-        console.log('Error decodificando JWT:');
+        // Token inválido, limpiar
+        setUser(null);
+        localStorage.removeItem('token');
       }
     }
-  }, [token]);
+  }, []);
 
-  function login(newToken: string) {
-    setToken(newToken);
-  }
-
-  function logout() {
-    setToken(null);
-  }
-
-  // Decodifica el token para obtener el userId y role
-  const decoded = token ? jwtDecode<JwtPayload>(token) : null;
-  const userId = decoded ? decoded.userId : null;
-  const role = decoded ? decoded.role : null;
+  const logout = () => {
+    setUser(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+    }
+  };
 
   return (
-    <UserContext.Provider value={{ token, isLoggedIn: !!token, userId, role, login, logout }}>
+    <UserContext.Provider value={{ user, setUser, logout }}>
       {children}
     </UserContext.Provider>
   );
 }
 
-// Hook para usar el contexto fácilmente
-export function useUser() {
-  return useContext(UserContext);
+// Custom hook para usar el contexto de usuario
+export function useUserContext() {
+  const context = useContext(UserContext);
+  if (!context) throw new Error('useUserContext must be used within a UserProvider');
+  return context;
 }

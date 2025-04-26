@@ -2,12 +2,21 @@
 import { useState } from 'react';
 import Button from '../../components/Button';
 import { useRouter } from 'next/navigation';
-import { useUser } from '../../context/UserContext';
+import { useUserContext } from '../../context/UserContext';
 import Link from 'next/link';
+import { jwtDecode } from 'jwt-decode';
+
+// Define el tipo correcto para tu payload JWT
+type MyJwtPayload = {
+  name?: string;
+  email: string;
+  role: string;
+  [key: string]: string | undefined;
+};
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useUser();
+  const { setUser } = useUserContext();
   // Estado para cada campo
   const [form, setForm] = useState({
     email: '',
@@ -28,43 +37,40 @@ export default function RegisterPage() {
   }
 
   // Maneja el submit
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setSuccess('');
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.message || 'Error al registrar usuario.');
+        setError('Error al registrar usuario');
         return;
       }
-
       const data = await res.json();
-      login(data.token || data.access_token);
-      router.push('/');
-      setSuccess('¡Registro exitoso! Ahora puedes iniciar sesión.');
-      setForm({
-        email: '',
-        password: '',
-        firstName: '',
-        lastName: '',
-        phone: '',
-        petName: '',
+      localStorage.setItem('token', data.access_token);
+
+      const decoded = jwtDecode<MyJwtPayload>(data.access_token);
+      setUser({
+        name: decoded.name || '',
+        email: decoded.email,
+        role: decoded.role,
       });
-      setError('');
+
+      setSuccess('¡Registro exitoso!');
+      router.push('/dashboard'); // O a donde quieras redirigir
     } catch {
       setError('Error de red');
     }
-  };
+  }
 
   return (
     <main className="min-h-[70vh] flex items-center justify-center bg-slate-50">
-      <form className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col gap-5" onSubmit={handleSubmit}>
+      <form className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col gap-5" onSubmit={handleRegister}>
         {error && <div className="mb-2 text-red-600 font-semibold">{error}</div>}
         <h2 className="text-2xl font-bold text-center text-teal-700 mb-2">Crear cuenta</h2>
         
