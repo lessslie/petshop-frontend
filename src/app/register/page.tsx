@@ -37,22 +37,28 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || 'Error al registrar');
-        return;
-      }
-      login(data.token || data.access_token);
-      router.push('/');
-      setSuccess('¡Registro exitoso! Ahora puedes iniciar sesión.');
-      setForm({
-        email: '',
-        password: '',
-        firstName: '',
-        lastName: '',
-        phone: '',
-        petName: '',
-      });
+      res
+        .then(async res => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            setError(data.message || 'Error al registrar usuario.');
+            return;
+          }
+          const data = await res.json();
+          login(data.token || data.access_token);
+          router.push('/');
+          setSuccess('¡Registro exitoso! Ahora puedes iniciar sesión.');
+          setForm({
+            email: '',
+            password: '',
+            firstName: '',
+            lastName: '',
+            phone: '',
+            petName: '',
+          });
+          setError('');
+        })
+        .catch(() => setError('Error de red al registrar usuario.'));
     } catch {
       setError('Error de red');
     }
@@ -61,9 +67,9 @@ export default function RegisterPage() {
   return (
     <main className="min-h-[70vh] flex items-center justify-center bg-slate-50">
       <form className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col gap-5" onSubmit={handleSubmit}>
+        {error && <div className="mb-2 text-red-600 font-semibold">{error}</div>}
         <h2 className="text-2xl font-bold text-center text-teal-700 mb-2">Crear cuenta</h2>
         
-        {error && <p className="text-red-600 text-center">{error}</p>}
         {success && <p className="text-green-600 text-center">{success}</p>}
 
         <div>

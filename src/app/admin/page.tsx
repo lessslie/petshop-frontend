@@ -20,6 +20,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [filtroFecha, setFiltroFecha] = useState('');
   const [mensaje, setMensaje] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -37,13 +38,18 @@ export default function AdminDashboard() {
       .then(data => {
         if (Array.isArray(data)) {
           setTurnos(data);
+          setError('');
         } else {
           setTurnos([]);
-          // Opcional: muestra un mensaje de error
+          setError(typeof data === 'object' && data.message ? data.message : 'Error inesperado al obtener los turnos.');
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        setTurnos([]);
+        setError('Error de red al obtener los turnos.');
+        setLoading(false);
+      });
   }, [isLoggedIn, role, token, router]);
 
   if (!isLoggedIn || role !== 'admin') return null;
@@ -80,6 +86,8 @@ export default function AdminDashboard() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Panel de Administración</h1>
+      {error && <div className="mb-2 text-red-600 font-semibold">{error}</div>}
+      {mensaje && <div className="mb-2 text-green-600 font-semibold">{mensaje}</div>}
       {/* Filtro de fecha */}
       <input
         type="date"
@@ -88,7 +96,6 @@ export default function AdminDashboard() {
         className="mb-4 p-2 border rounded"
         placeholder="Filtrar por fecha"
       />
-      {mensaje && <div className="mb-2 text-green-600 font-semibold">{mensaje}</div>}
       {loading ? (
         <p>Cargando turnos...</p>
       ) : (
