@@ -28,14 +28,19 @@ export default function AdminDashboard() {
       return;
     }
     // Fetch de todos los turnos (solo admin)
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos/all`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     })
       .then(res => res.json())
       .then(data => {
-        setTurnos(data);
+        if (Array.isArray(data)) {
+          setTurnos(data);
+        } else {
+          setTurnos([]);
+          // Opcional: muestra un mensaje de error
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
