@@ -1,3 +1,5 @@
+'use client';
+
 import { useUser } from '../../context/UserContext';
 import { useEffect, useState } from 'react';
 
@@ -6,7 +8,7 @@ type Turno = {
   date: string;
   time: string;
   serviceType: string;
-  // Puedes agregar más campos si necesitas
+  id: string;
 };
 
 export default function Dashboard() {
