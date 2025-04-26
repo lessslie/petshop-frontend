@@ -37,28 +37,26 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      res
-        .then(async res => {
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            setError(data.message || 'Error al registrar usuario.');
-            return;
-          }
-          const data = await res.json();
-          login(data.token || data.access_token);
-          router.push('/');
-          setSuccess('¡Registro exitoso! Ahora puedes iniciar sesión.');
-          setForm({
-            email: '',
-            password: '',
-            firstName: '',
-            lastName: '',
-            phone: '',
-            petName: '',
-          });
-          setError('');
-        })
-        .catch(() => setError('Error de red al registrar usuario.'));
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.message || 'Error al registrar usuario.');
+        return;
+      }
+
+      const data = await res.json();
+      login(data.token || data.access_token);
+      router.push('/');
+      setSuccess('¡Registro exitoso! Ahora puedes iniciar sesión.');
+      setForm({
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        phone: '',
+        petName: '',
+      });
+      setError('');
     } catch {
       setError('Error de red');
     }

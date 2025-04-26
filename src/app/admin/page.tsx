@@ -45,7 +45,7 @@ export default function AdminDashboard() {
         }
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setTurnos([]);
         setError('Error de red al obtener los turnos.');
         setLoading(false);

@@ -36,7 +36,7 @@ export default function Dashboard() {
         }
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setTurnos([]);
         setError('Error de red al obtener los turnos.');
         setLoading(false);
