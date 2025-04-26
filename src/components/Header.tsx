@@ -9,7 +9,7 @@ export default function Header()  : JSX.Element {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { isLoggedIn, logout } = useUser();
+  const { isLoggedIn, logout, role } = useUser();
 
   useEffect(() => {
     if (!open) return;
@@ -35,12 +35,19 @@ export default function Header()  : JSX.Element {
         </Link>
         <nav className="hidden md:flex gap-8 items-center">
           <Link href="/" className="hover:text-pink-400 transition hover:scale-105">Inicio</Link>
+          {isLoggedIn && role === 'admin' && (
+            <Link href="/admin" className="hover:text-yellow-400 transition hover:scale-105">Admin</Link>
+          )}
+          {isLoggedIn && (
+            <Link href="/dashboard" className="hover:text-teal-400 transition hover:scale-105">Mi Panel</Link>
+          )}
           {!isLoggedIn && (
             <>
               <Link href="/login" className="hover:text-teal-400 transition hover:scale-105">Login</Link>
               <Link href="/register" className="hover:text-teal-400 transition hover:scale-105">Registro</Link>
             </>
-          )} {isLoggedIn && (
+          )}
+          {isLoggedIn && (
             <button
               onClick={logout}
               className="ml-4 px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-sm font-semibold shadow transition"
@@ -70,6 +77,24 @@ export default function Header()  : JSX.Element {
             >
               Inicio
             </Link>
+            {isLoggedIn && role === 'admin' && (
+              <Link
+                href="/admin"
+                className="hover:text-yellow-400 transition hover:scale-105"
+                onClick={() => setOpen(false)}
+              >
+                Admin
+              </Link>
+            )}
+            {isLoggedIn && (
+              <Link
+                href="/dashboard"
+                className="hover:text-teal-400 transition hover:scale-105"
+                onClick={() => setOpen(false)}
+              >
+                Mi Panel
+              </Link>
+            )}
             {!isLoggedIn ? (
               <>
                 <Link

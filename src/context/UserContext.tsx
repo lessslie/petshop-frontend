@@ -6,6 +6,7 @@ type UserContextType = {
   token: string | null;
   isLoggedIn: boolean;
   userId: string | null;
+  role: string | null;
   login: (token: string) => void;
   logout: () => void;
 };
@@ -13,18 +14,23 @@ type UserContextType = {
 type JwtPayload = {
   sub: string; 
   userId: string;
+  role: string;
 };
 
 const UserContext = createContext<UserContextType>({
   token: null,
   isLoggedIn: false,
   userId: null,
+  role: null,
+
   login: () => {},
   logout: () => {},
 });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
+  
+      
   
   // Cargar token de localStorage al iniciar
   useEffect(() => {
@@ -59,11 +65,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
   }
 
-  // Decodifica el token para obtener el userId
-  const userId = token ? (jwtDecode<JwtPayload>(token).userId) : null;
+  // Decodifica el token para obtener el userId y role
+  const decoded = token ? jwtDecode<JwtPayload>(token) : null;
+  const userId = decoded ? decoded.userId : null;
+  const role = decoded ? decoded.role : null;
 
   return (
-    <UserContext.Provider value={{ token, isLoggedIn: !!token, userId, login, logout }}>
+    <UserContext.Provider value={{ token, isLoggedIn: !!token, userId, role, login, logout }}>
       {children}
     </UserContext.Provider>
   );
