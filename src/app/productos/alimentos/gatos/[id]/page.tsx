@@ -24,7 +24,7 @@ export default function DetalleProductoGato({ params }: { params: { id: string }
 
   useEffect(() => {
     if (!id) return;
-    fetch(`http://localhost:3001/products/${id}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${id}`)
       .then(res => {
         if (!res.ok) throw new Error('No se pudo cargar el producto');
         return res.json();

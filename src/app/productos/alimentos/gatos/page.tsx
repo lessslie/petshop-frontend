@@ -23,7 +23,7 @@ export default function AlimentosGatosPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch('http://localhost:3001/products/categoria/alimento_gato')
+    fetch('${process.env.NEXT_PUBLIC_API_URL}/products/categoria/alimento_gato')
       .then(res => {
         if (!res.ok) throw new Error('No se pudieron cargar los productos');
         return res.json();

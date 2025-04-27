@@ -30,7 +30,7 @@ export default function AdminAlimentos() {
   }
 
   useEffect(() => {
-    fetch('http://localhost:3001/products/categoria/alimento_perro')
+    fetch('${process.env.NEXT_PUBLIC_API_URL}/products/categoria/alimento_perro')
       .then(res => {
         if (!res.ok) throw new Error('No se pudieron cargar los productos');
         return res.json();
@@ -48,7 +48,7 @@ export default function AdminAlimentos() {
   function handleDelete(id: string) {
     if (!window.confirm('¿Seguro que deseas eliminar este producto?')) return;
     const token = getToken();
-    fetch(`http://localhost:3001/products/${id}`, { 
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${id}`, { 
       method: 'DELETE', 
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
@@ -187,7 +187,7 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
     try {
       const token = getToken();
       const method = initial ? 'PUT' : 'POST';
-      const url = initial ? `http://localhost:3001/products/${initial.id}` : 'http://localhost:3001/products';
+      const url = initial ? `${process.env.NEXT_PUBLIC_API_URL}/products/${initial.id}` : '${process.env.NEXT_PUBLIC_API_URL}/products';
       const res = await fetch(url, {
         method,
         headers: {
