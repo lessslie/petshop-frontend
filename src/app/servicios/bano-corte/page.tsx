@@ -2,10 +2,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import type { PreciosServicios } from '../../admin/servicios/page';
 
 export default function BanoCortePage() {
   const router = useRouter();
-  const [precios, setPrecios] = useState<any>(null);
+  const [precios, setPrecios] = useState<PreciosServicios | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

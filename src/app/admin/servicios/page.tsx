@@ -1,14 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
 
+// Tipo para los precios de servicios
+export type PreciosServicios = {
+  bano_corte: {
+    perro_grande: number;
+    perro_mediano: number;
+    perro_chico: number;
+  };
+};
+
 export default function AdminServiciosPage() {
-  const [precios, setPrecios] = useState({
-    bano_corte: {
-      perro_grande: 0,
-      perro_mediano: 0,
-      perro_chico: 0,
-    },
-  });
+  const [precios, setPrecios] = useState<PreciosServicios | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +34,7 @@ export default function AdminServiciosPage() {
     setPrecios((prev) => ({
       ...prev,
       bano_corte: {
-        ...prev.bano_corte,
+        ...prev!.bano_corte,
         [key]: Number(e.target.value),
       },
     }));
@@ -50,8 +53,9 @@ export default function AdminServiciosPage() {
       });
       if (!res.ok) throw new Error("No se pudo guardar");
       setSuccess("Precios actualizados correctamente");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError('Error desconocido');
     }
     setSaving(false);
   }
