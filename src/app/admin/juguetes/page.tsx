@@ -205,7 +205,7 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
     try {
       const token = getToken();
       const method = initial ? 'PUT' : 'POST';
-      const url = initial ? `${process.env.NEXT_PUBLIC_API_URL}/products/${initial.id}` : '${process.env.NEXT_PUBLIC_API_URL}/products';
+      const url = initial ? `${process.env.NEXT_PUBLIC_API_URL}/products/${initial.id}` : `${process.env.NEXT_PUBLIC_API_URL}/products`;
       const res = await fetch(url, {
         method,
         headers: {

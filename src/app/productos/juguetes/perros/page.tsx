@@ -23,7 +23,7 @@ export default function JuguetesPerrosPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("${process.env.NEXT_PUBLIC_API_URL}/products/categoria/juguetes_perro")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/categoria/juguetes_perro`)
       .then((res) => {
         if (!res.ok) throw new Error("No se pudieron cargar los productos");
         return res.json();
