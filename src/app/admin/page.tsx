@@ -53,6 +53,12 @@ export default function AdminDashboard() {
           <span className="text-xl font-semibold mb-1">Juguetes</span>
           <span className="text-gray-500 text-center">Gestiona productos de juguetes</span>
         </a>
+        {/* Card Servicios */}
+        <a href="/admin/servicios" className="bg-white shadow-lg rounded-xl p-8 flex flex-col items-center hover:bg-teal-50 transition cursor-pointer border border-teal-200">
+          <span className="text-5xl mb-2">💈</span>
+          <span className="text-xl font-semibold mb-1">Precios de Servicios</span>
+          <span className="text-gray-500 text-center">Editá los precios de baño y corte</span>
+        </a>
       </div>
     </div>
   );
