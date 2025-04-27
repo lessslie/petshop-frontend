@@ -56,7 +56,7 @@ export default function Dashboard() {
         <p>Cargando tus turnos...</p>
       ) : (
         <div>
-          {error && <div className="mb-2 text-red-600 font-semibold">{error}</div>}
+          {error && <div className="mb-2 text-red-600 font-semibold">{}</div>}
           {(() => {
             const pendientes = turnos.filter(t => t.payment_status !== 'paid');
             const confirmados = turnos.filter(t => t.payment_status === 'paid');
