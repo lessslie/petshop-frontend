@@ -56,10 +56,12 @@ export default function Dashboard() {
         <p>Cargando tus turnos...</p>
       ) : (
         <div>
-          {error && <div className="mb-2 text-red-600 font-semibold">{}</div>}
+          {/* CAMBIO: Mensaje amigable si no hay turnos confirmados */}
+          {error && <div className="mb-2 text-red-600 font-semibold">{error}</div>}
           {(() => {
             const pendientes = turnos.filter(t => t.payment_status !== 'paid');
             const confirmados = turnos.filter(t => t.payment_status === 'paid');
+            // CAMBIO: Si no hay turnos confirmados, mostrar mensaje amigable
             if (turnos.length === 0 || (pendientes.length > 0 && confirmados.length === 0)) {
               return (
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded mb-4 flex items-center gap-3 animate-fade-in">
@@ -101,6 +103,7 @@ export default function Dashboard() {
                 </div>
               );
             }
+            // Si hay turnos confirmados, mostrar la tabla normalmente
             return (
               <table className="min-w-full border">
                 <thead>
