@@ -2,6 +2,7 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'next/navigation';
 
 interface User {
   name?: string;
@@ -41,11 +42,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const router = useRouter();
   const logout = () => {
     setUser(null);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
     }
+    router.push('/');
   };
 
   return (

@@ -47,11 +47,19 @@ export default function AdminTurnos() {
   const [pagina, setPagina] = useState(1); // <-- NUEVO: página actual
   const turnosPorPagina = 10; // <-- NUEVO: solo 10 turnos por página
 
-  // Calcula los turnos a mostrar en la página actual
-  const indiceInicio = (pagina - 1) * turnosPorPagina; // <-- NUEVO
-  const indiceFin = indiceInicio + turnosPorPagina; // <-- NUEVO
-  const turnosPagina = turnosFiltrados.slice(indiceInicio, indiceFin); // <-- NUEVO
-  const totalPaginas = Math.ceil(turnosFiltrados.length / turnosPorPagina); // <-- NUEVO
+  // Ordenar los turnos por fecha y hora ascendente (más próximo primero)
+  const turnosOrdenados = [...turnos].sort((a, b) => {
+    const fechaA = new Date(`${a.date}T${a.time}`);
+    const fechaB = new Date(`${b.date}T${b.time}`);
+    return fechaA.getTime() - fechaB.getTime();
+  });
+
+  // PAGINACIÓN sobre turnos ordenados
+  const indiceInicio = (pagina - 1) * turnosPorPagina;
+  const indiceFin = indiceInicio + turnosPorPagina;
+  const turnosPagina = turnosOrdenados.slice(indiceInicio, indiceFin);
+
+  const totalPaginas = Math.ceil(turnosOrdenados.length / turnosPorPagina); // <-- NUEVO
 
   // Accede a localStorage solo en el cliente
   useEffect(() => {
@@ -64,6 +72,10 @@ export default function AdminTurnos() {
       router.push("/dashboard");
       return;
     }
+    // Si necesitas obtener los turnos de un usuario específico, usa la ruta correcta:
+    // fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos/appointments/${userId}`, { ... })
+    // Si es para todos los turnos (admin), la ruta /turnos está bien.
+    // Si tienes algún fetch con /turnos/user/, cámbialo a /turnos/appointments/.
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -182,67 +194,46 @@ export default function AdminTurnos() {
       {loading ? (
         <p>Cargando turnos...</p>
       ) : (
-        // TABLA DE TURNOS: ahora es responsive y usa paginación
-        <div className="overflow-x-auto">
-          <table className="min-w-[600px] w-full border text-sm">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="border px-2">Cliente</th>
-                {/* Solo visible en md+ */}
-                <th className="border px-2 hidden md:table-cell">Email</th>
-                <th className="border px-2">Mascota</th>
-                {/* Solo visible en md+ */}
-                <th className="border px-2 hidden md:table-cell">Fecha</th>
-                <th className="border px-2 hidden md:table-cell">Hora</th>
-                <th className="border px-2 hidden md:table-cell">Servicio</th>
-                <th className="border px-2 hidden md:table-cell">Tamaño</th>
-                <th className="border px-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* CAMBIO: solo mostrar los turnos de la página actual */}
-              {turnosPagina.map((turno) => (
-                <tr key={turno.id} className="hover:bg-slate-50">
-                  <td className="border px-2 whitespace-nowrap max-w-[120px] overflow-x-auto">{turno.userName}</td>
-                  {/* Solo visible en md+ */}
-                  <td className="border px-2 whitespace-nowrap max-w-[160px] overflow-x-auto hidden md:table-cell">{turno.email}</td>
-                  <td className="border px-2 whitespace-nowrap max-w-[120px] overflow-x-auto">{turno.dogName}</td>
-                  {/* Solo visible en md+ */}
-                  <td className="border px-2 whitespace-nowrap hidden md:table-cell">{turno.date}</td>
-                  <td className="border px-2 whitespace-nowrap hidden md:table-cell">{turno.time}</td>
-                  <td className="border px-2 whitespace-nowrap hidden md:table-cell">{turno.serviceType}</td>
-                  <td className="border px-2 whitespace-nowrap hidden md:table-cell">{turno.dogSize}</td>
-                  <td className="border px-2 flex flex-col gap-1 items-center min-w-[110px]">
-                    {/* Todos los botones tienen el mismo ancho y los colores suaves originales */}
-                    <button
-                      onClick={() => setClienteSeleccionado(turno)}
-                      className="w-full bg-blue-100 text-blue-700 font-semibold rounded px-2 py-1 text-xs hover:bg-blue-200 transition-colors"
-                    >Ver</button>
-                    <button
-                      onClick={() => handleEditarTurno(turno)}
-                      className="w-full bg-yellow-100 text-yellow-700 font-semibold rounded px-2 py-1 text-xs hover:bg-yellow-200 transition-colors"
-                    >Editar</button>
-                    <button
-                      onClick={() => eliminarTurno(turno.id)}
-                      className="w-full bg-red-100 text-red-700 font-semibold rounded px-2 py-1 text-xs hover:bg-red-200 transition-colors"
-                    >Eliminar</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        // Grid responsive: 1 columna en mobile, 2 columnas desde md+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center">
+          {turnosPagina.length === 0 ? (
+            <div className="text-center text-gray-600 col-span-full">No hay turnos para mostrar.</div>
+          ) : (
+            turnosPagina.map((turno) => (
+              <div key={turno.id} className="bg-white rounded-xl shadow p-4 border border-gray-200 w-full max-w-md text-center">
+                <div className="mb-1"><span className="font-semibold">Cliente:</span> {turno.userName}</div>
+                <div className="mb-1"><span className="font-semibold">Email:</span> {turno.email}</div>
+                <div className="mb-1"><span className="font-semibold">Mascota:</span> {turno.dogName}</div>
+                <div className="mb-1"><span className="font-semibold">Fecha:</span> {turno.date}</div>
+                <div className="mb-1"><span className="font-semibold">Hora:</span> {turno.time}</div>
+                <div className="mb-1"><span className="font-semibold">Tamaño:</span> {turno.dogSize}</div>
+                <div className="mb-1"><span className="font-semibold">Servicio:</span> {turno.serviceType}</div>
+                <div className="flex gap-2 mt-2 flex-wrap justify-center">
+                  <button onClick={() => handleEditarTurno(turno)} className="bg-teal-600 hover:bg-teal-700 text-white py-1 px-3 rounded text-sm">Editar</button>
+                  <button onClick={() => eliminarTurno(turno.id)} className="bg-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded text-sm">Eliminar</button>
+                  <button onClick={() => setClienteSeleccionado(turno)} className="bg-gray-300 hover:bg-gray-400 text-gray-900 py-1 px-3 rounded text-sm">Ver Cliente</button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       )}
-      {/* --- PAGINACIÓN: botones debajo de la tabla --- */}
-      <div className="flex flex-wrap justify-center gap-2 mt-4"> 
+      {/* --- PAGINACIÓN: botones debajo de las tarjetas --- */}
+      <div className="flex justify-center mt-6 gap-2 flex-wrap">
         <button
-          onClick={() => setPagina(p => Math.max(1, p - 1))}
+          onClick={() => setPagina((p) => Math.max(1, p - 1))}
           disabled={pagina === 1}
           className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
         >Anterior</button>
-        <span className="px-2">Página {pagina} de {totalPaginas}</span>
+        {Array.from({ length: totalPaginas }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => setPagina(i + 1)}
+            className={`px-3 py-1 rounded ${pagina === i + 1 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`}
+          >{i + 1}</button>
+        ))}
         <button
-          onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
+          onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
           disabled={pagina === totalPaginas}
           className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
         >Siguiente</button>

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useUserContext } from '../context/UserContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // <--- NUEVO
 import { JSX } from 'react';
 
 export default function Header()  : JSX.Element {
@@ -12,6 +13,7 @@ export default function Header()  : JSX.Element {
   const { user, logout } = useUserContext();
   const isLoggedIn = !!user;
   const role = user?.role || null;
+  const router = useRouter(); // <--- NUEVO
 
   useEffect(() => {
     if (!open) return;
@@ -51,7 +53,10 @@ export default function Header()  : JSX.Element {
           )}
           {isLoggedIn && (
             <button
-              onClick={logout}
+              onClick={() => {
+                logout();
+                router.push('/'); // <--- REDIRECCIÓN AL CERRAR SESIÓN
+              }}
               className="ml-4 px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-sm font-semibold shadow transition"
             >
               Cerrar sesión
@@ -118,6 +123,7 @@ export default function Header()  : JSX.Element {
               <button
                 onClick={() => {
                   logout();
+                  router.push('/'); // <--- REDIRECCIÓN TAMBIÉN EN EL MENÚ MÓVIL
                   setOpen(false);
                 }}
                 className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-sm font-semibold shadow transition"
@@ -140,14 +146,3 @@ export default function Header()  : JSX.Element {
     </>
   );
 }
-
-// const navLinkStyle = {
-//   color: '#fff',
-//   textDecoration: 'none',
-//   fontWeight: 500,
-//   fontSize: 18,
-//   padding: '6px 12px',
-//   borderRadius: 6,
-//   transition: 'background 0.2s',
-//   background: 'none'
-// };
