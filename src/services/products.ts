@@ -1,4 +1,4 @@
-const process.env.NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
+// ¡No necesitas reasignar process.env! Esa línea es inválida y causa error de compilación.
 
 export type Product = {
   id: string;
