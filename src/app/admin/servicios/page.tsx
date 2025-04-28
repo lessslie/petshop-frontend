@@ -1,6 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 
+function getToken() {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('token');
+  }
+  return null;
+}
 // Tipo para los precios de servicios
 export type PreciosServicios = {
   bano_corte: {
@@ -18,7 +24,10 @@ export default function AdminServiciosPage() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    fetch("/api/servicios")
+    const token = getToken();
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((res) => res.json())
       .then((data) => {
         setPrecios(data);
@@ -46,9 +55,14 @@ export default function AdminServiciosPage() {
     setError("");
     setSuccess("");
     try {
-      const res = await fetch("/api/servicios", {
+      const token = getToken ();
+  
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(precios),
       });
       if (!res.ok) throw new Error("No se pudo guardar");

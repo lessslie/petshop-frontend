@@ -37,6 +37,22 @@ export default function AdminTurnos() {
     serviceType: '',
   });
 
+  // Filtra los turnos por fecha (YYYY-MM-DD)
+  const turnosFiltrados = filtroFecha
+    ? turnos.filter((turno) => turno.date.startsWith(filtroFecha))
+    : turnos;
+
+  // --- PAGINACIÓN ---
+  // Nuevo estado para la página actual y cantidad por página
+  const [pagina, setPagina] = useState(1); // <-- NUEVO: página actual
+  const turnosPorPagina = 10; // <-- NUEVO: solo 10 turnos por página
+
+  // Calcula los turnos a mostrar en la página actual
+  const indiceInicio = (pagina - 1) * turnosPorPagina; // <-- NUEVO
+  const indiceFin = indiceInicio + turnosPorPagina; // <-- NUEVO
+  const turnosPagina = turnosFiltrados.slice(indiceInicio, indiceFin); // <-- NUEVO
+  const totalPaginas = Math.ceil(turnosFiltrados.length / turnosPorPagina); // <-- NUEVO
+
   // Accede a localStorage solo en el cliente
   useEffect(() => {
     setToken(typeof window !== 'undefined' ? localStorage.getItem('token') : null);
@@ -75,22 +91,14 @@ export default function AdminTurnos() {
       });
   }, [token, isLoggedIn, role, router]);
 
-  // Filtra los turnos por fecha (YYYY-MM-DD)
-  const turnosFiltrados = filtroFecha
-    ? turnos.filter((turno) => turno.date.startsWith(filtroFecha))
-    : turnos;
-
   // Función para eliminar turno
   const eliminarTurno = async (turnoId: string) => {
     if (!confirm("¿Estás seguro de eliminar este turno?")) return;
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/turnos/${turnoId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos/${turnoId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (res.ok) {
         setTurnos((turnos) => turnos.filter((t) => t.id !== turnoId));
         setMensaje("Turno eliminado correctamente.");
@@ -174,50 +182,71 @@ export default function AdminTurnos() {
       {loading ? (
         <p>Cargando turnos...</p>
       ) : (
-        <table className="min-w-full border">
-          <thead>
-            <tr>
-              <th className="border px-2">Cliente</th>
-              <th className="border px-2">Mascota</th>
-              <th className="border px-2">Fecha</th>
-              <th className="border px-2">Hora</th>
-              <th className="border px-2">Servicio</th>
-              <th className="border px-2">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {turnosFiltrados.map((turno, i) => (
-              <tr key={i}>
-                <td
-                  className="border px-2 text-teal-700 underline cursor-pointer hover:text-teal-900"
-                  onClick={() => setClienteSeleccionado(turno)}
-                  title="Ver datos del cliente"
-                >
-                  {turno.userName || 'Sin nombre'}
-                </td>
-                <td className="border px-2">{turno.dogName}</td>
-                <td className="border px-2">{turno.date}</td>
-                <td className="border px-2">{turno.time}</td>
-                <td className="border px-2">{turno.serviceType}</td>
-                <td className="border px-2 flex gap-2">
-                  <button
-                    className="bg-blue-500 text-white px-2 py-1 rounded"
-                    onClick={() => handleEditarTurno(turno)}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="bg-red-500 text-white px-2 py-1 rounded"
-                    onClick={() => eliminarTurno(turno.id)}
-                  >
-                    Eliminar
-                  </button>
-                </td>
+        // TABLA DE TURNOS: ahora es responsive y usa paginación
+        <div className="overflow-x-auto">
+          <table className="min-w-[600px] w-full border text-sm">
+            <thead className="bg-slate-100">
+              <tr>
+                <th className="border px-2">Cliente</th>
+                {/* Solo visible en md+ */}
+                <th className="border px-2 hidden md:table-cell">Email</th>
+                <th className="border px-2">Mascota</th>
+                {/* Solo visible en md+ */}
+                <th className="border px-2 hidden md:table-cell">Fecha</th>
+                <th className="border px-2 hidden md:table-cell">Hora</th>
+                <th className="border px-2 hidden md:table-cell">Servicio</th>
+                <th className="border px-2 hidden md:table-cell">Tamaño</th>
+                <th className="border px-2">Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {/* CAMBIO: solo mostrar los turnos de la página actual */}
+              {turnosPagina.map((turno) => (
+                <tr key={turno.id} className="hover:bg-slate-50">
+                  <td className="border px-2 whitespace-nowrap max-w-[120px] overflow-x-auto">{turno.userName}</td>
+                  {/* Solo visible en md+ */}
+                  <td className="border px-2 whitespace-nowrap max-w-[160px] overflow-x-auto hidden md:table-cell">{turno.email}</td>
+                  <td className="border px-2 whitespace-nowrap max-w-[120px] overflow-x-auto">{turno.dogName}</td>
+                  {/* Solo visible en md+ */}
+                  <td className="border px-2 whitespace-nowrap hidden md:table-cell">{turno.date}</td>
+                  <td className="border px-2 whitespace-nowrap hidden md:table-cell">{turno.time}</td>
+                  <td className="border px-2 whitespace-nowrap hidden md:table-cell">{turno.serviceType}</td>
+                  <td className="border px-2 whitespace-nowrap hidden md:table-cell">{turno.dogSize}</td>
+                  <td className="border px-2 flex flex-col gap-1 items-center min-w-[110px]">
+                    {/* Todos los botones tienen el mismo ancho y los colores suaves originales */}
+                    <button
+                      onClick={() => setClienteSeleccionado(turno)}
+                      className="w-full bg-blue-100 text-blue-700 font-semibold rounded px-2 py-1 text-xs hover:bg-blue-200 transition-colors"
+                    >Ver</button>
+                    <button
+                      onClick={() => handleEditarTurno(turno)}
+                      className="w-full bg-yellow-100 text-yellow-700 font-semibold rounded px-2 py-1 text-xs hover:bg-yellow-200 transition-colors"
+                    >Editar</button>
+                    <button
+                      onClick={() => eliminarTurno(turno.id)}
+                      className="w-full bg-red-100 text-red-700 font-semibold rounded px-2 py-1 text-xs hover:bg-red-200 transition-colors"
+                    >Eliminar</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
+      {/* --- PAGINACIÓN: botones debajo de la tabla --- */}
+      <div className="flex flex-wrap justify-center gap-2 mt-4"> 
+        <button
+          onClick={() => setPagina(p => Math.max(1, p - 1))}
+          disabled={pagina === 1}
+          className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+        >Anterior</button>
+        <span className="px-2">Página {pagina} de {totalPaginas}</span>
+        <button
+          onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
+          disabled={pagina === totalPaginas}
+          className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+        >Siguiente</button>
+      </div>
       {clienteSeleccionado && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">

@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const process.env.NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export type Product = {
   id: string;
@@ -12,7 +12,7 @@ export type Product = {
 };
 
 export async function fetchProducts(): Promise<Product[]> {
-  const res = await fetch(`${API_URL}/products`, { cache: 'no-store' });
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, { cache: 'no-store' });
   if (!res.ok) throw new Error('No se pudieron obtener los productos');
   return res.json();
 }

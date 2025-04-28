@@ -11,7 +11,7 @@ export default function BanoCortePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/servicios')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios`)
       .then(r => r.json())
       .then(data => {
         setPrecios(data);

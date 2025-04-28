@@ -8,9 +8,13 @@ import Link from 'next/link';
 
 // Define el tipo correcto para tu payload JWT
 type MyJwtPayload = {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   role: string;
+  userId?: string;
+  phone?: string;
+  petName?: string;
   [key: string]: string | undefined;
 };
 
@@ -44,6 +48,7 @@ async function handleSubmit(e: React.FormEvent) {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
       method: 'POST',
+
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     });
@@ -59,9 +64,10 @@ async function handleSubmit(e: React.FormEvent) {
     const decoded = jwtDecode<MyJwtPayload>(data.access_token);
 
     setUser({
-      name: decoded.name || '',
+      name: `${decoded.firstName || ''} ${decoded.lastName || ''}`.trim(),
       email: decoded.email,
       role: decoded.role,
+      userId: decoded.userId,
     });
     setSuccess('¡Login exitoso!');
     // Redirige según el rol

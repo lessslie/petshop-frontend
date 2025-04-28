@@ -8,9 +8,13 @@ import { jwtDecode } from 'jwt-decode';
 
 // Define el tipo correcto para tu payload JWT
 type MyJwtPayload = {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   role: string;
+  userId: string;
+  phone: string;
+  petName: string;
   [key: string]: string | undefined;
 };
 
@@ -56,9 +60,10 @@ export default function RegisterPage() {
 
       const decoded = jwtDecode<MyJwtPayload>(data.access_token);
       setUser({
-        name: decoded.name || '',
+        name: `${decoded.firstName || ''} ${decoded.lastName || ''}`.trim(),
         email: decoded.email,
         role: decoded.role,
+        userId: decoded.userId,
       });
 
       setSuccess('¡Registro exitoso!');
