@@ -37,11 +37,6 @@ export default function AdminTurnos() {
     serviceType: '',
   });
 
-  // Filtra los turnos por fecha (YYYY-MM-DD)
-  const turnosFiltrados = filtroFecha
-    ? turnos.filter((turno) => turno.date.startsWith(filtroFecha))
-    : turnos;
-
   // --- PAGINACIÓN ---
   // Nuevo estado para la página actual y cantidad por página
   const [pagina, setPagina] = useState(1); // <-- NUEVO: página actual
