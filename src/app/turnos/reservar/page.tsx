@@ -43,6 +43,14 @@ function ReservaTurnoPage() {
     userId: userId || '',
   });
   const [error, setError] = useState('');
+  const [precios, setPrecios] = useState<any>(null);
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios`)
+      .then(res => res.json())
+      .then(data => setPrecios(data))
+      .catch(() => setPrecios(null));
+  }, []);
 
   const weekDays = getNextTwoWeeksWeekdays();
 
@@ -99,6 +107,7 @@ function ReservaTurnoPage() {
           ...form,
           date: selectedDate,
           time: selectedSlot,
+          price: getRealPrice(form.dogSize, form.serviceType), // <-- ¡Enviamos el precio real!
         }),
       });
       const data = await res.json();
@@ -117,6 +126,25 @@ function ReservaTurnoPage() {
       setError('Error de red');
     }
   };
+
+  // --- función para calcular el precio REAL usando los datos del backend ---
+  function getRealPrice(dogSize: string, serviceType: string): number | undefined {
+    if (!precios) return undefined;
+    // Mapear los nombres del backend a los del frontend
+    const sizeMap: Record<string, string> = {
+      small: 'perro_chico',
+      medium: 'perro_mediano',
+      large: 'perro_grande',
+    };
+    const typeMap: Record<string, string> = {
+      bath: 'bano',
+      'bath and cut': 'bano_corte',
+    };
+    const sizeKey = sizeMap[dogSize];
+    const typeKey = typeMap[serviceType];
+    if (!sizeKey || !typeKey) return undefined;
+    return precios[typeKey]?.[sizeKey];
+  }
 
   if (!isLoggedIn) {
     return (
@@ -209,6 +237,12 @@ function ReservaTurnoPage() {
               <option value="bath and cut">Baño y corte</option>
             </select>
           </div>
+          {/* Mostrar precio REAL si está disponible */}
+          {form.dogSize && form.serviceType && (
+            <div className="text-teal-700 font-semibold text-lg text-center">
+              Precio: {getRealPrice(form.dogSize, form.serviceType) ? `$${getRealPrice(form.dogSize, form.serviceType)}` : '-'}
+            </div>
+          )}
           <button type="submit" className="w-full px-5 py-2 bg-blue-100 text-blue-700 rounded-lg font-semibold shadow hover:bg-blue-300 hover:text-blue-900 transition">
             Confirmar turno para {selectedDate} a las {selectedSlot}
           </button>
@@ -220,6 +254,14 @@ function ReservaTurnoPage() {
         <div className="bg-white rounded-xl shadow-md border border-gray-200 p-8 flex flex-col items-center">
           <h2 className="text-lg font-semibold text-gray-700 mb-2">¡Turno reservado!</h2>
           <p className="text-gray-600 mb-4">Recibirás una confirmación por email.</p>
+          {/* Mostrar detalles del turno reservado */}
+          <div className="text-lg text-teal-700 font-semibold mt-2">
+            {form.dogSize && form.serviceType && (
+              <>
+                Precio: {getRealPrice(form.dogSize, form.serviceType) ? `$${getRealPrice(form.dogSize, form.serviceType)}` : '-'}
+              </>
+            )}
+          </div>
         </div>
       )}
     </main>

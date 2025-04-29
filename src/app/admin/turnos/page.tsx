@@ -14,6 +14,8 @@ export type Turno = {
   time: string;
   serviceType: string;
   dogSize?: string;
+  price?: number;
+  paymentStatus?: string;
 };
 
 export default function AdminTurnos() {
@@ -203,6 +205,8 @@ export default function AdminTurnos() {
                 <div className="mb-1"><span className="font-semibold">Hora:</span> {turno.time}</div>
                 <div className="mb-1"><span className="font-semibold">Tamaño:</span> {turno.dogSize}</div>
                 <div className="mb-1"><span className="font-semibold">Servicio:</span> {turno.serviceType}</div>
+                <div className="mb-1"><span className="font-semibold">Precio:</span> ${turno.price}</div>
+                <div className="mb-1"><span className="font-semibold">Estado de pago:</span> {turno.paymentStatus}</div>
                 <div className="flex gap-2 mt-2 flex-wrap justify-center">
                   <button onClick={() => handleEditarTurno(turno)} className="bg-teal-600 hover:bg-teal-700 text-white py-1 px-3 rounded text-sm">Editar</button>
                   <button onClick={() => eliminarTurno(turno.id)} className="bg-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded text-sm">Eliminar</button>

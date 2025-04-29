@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useUserContext } from '../context/UserContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // <--- NUEVO
+import { useRouter } from 'next/navigation'; 
 import { JSX } from 'react';
 
 export default function Header()  : JSX.Element {
@@ -13,7 +13,7 @@ export default function Header()  : JSX.Element {
   const { user, logout } = useUserContext();
   const isLoggedIn = !!user;
   const role = user?.role || null;
-  const router = useRouter(); // <--- NUEVO
+  const router = useRouter(); 
 
   useEffect(() => {
     if (!open) return;
@@ -34,10 +34,16 @@ export default function Header()  : JSX.Element {
   return (
     <>
       <header className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+        
         <Link href="/" className="font-bold text-2xl tracking-wide flex items-center gap-2">
           <span role="img" aria-label="huella">🐾</span> Pelu PetShop
         </Link>
+        
         <nav className="hidden md:flex gap-8 items-center">
+           {/* Botón de acceso al carrito con emoji */}
+                        <Link href="/carrito" className="text-2xl hover:scale-110 transition" title="Ver carrito">
+                          <span role="img" aria-label="carrito">🛒</span>
+                        </Link>
           <Link href="/" className="hover:text-pink-400 transition hover:scale-105">Inicio</Link>
           {isLoggedIn && role === 'admin' && (
             <Link href="/admin" className="hover:text-yellow-400 transition hover:scale-105">Admin</Link>
@@ -77,6 +83,10 @@ export default function Header()  : JSX.Element {
             ref={menuRef}
             className="absolute top-20 right-6 bg-slate-900 bg-opacity-45 backdrop-blur rounded-xl shadow-lg flex flex-col gap-4 p-5 z-50 w-48 animate-fade-in"
           >
+             {/* Botón de acceso al carrito con emoji */}
+                          <Link href="/carrito" className="text-2xl hover:scale-110 transition" title="Ver carrito">
+                            <span role="img" aria-label="carrito">🛒</span>
+                          </Link>
             <Link
               href="/"
               className="hover:text-pink-400 transition hover:scale-105"

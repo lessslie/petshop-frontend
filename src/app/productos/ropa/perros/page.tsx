@@ -22,6 +22,9 @@ export default function RopaPerrosPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  // Estado para mostrar un toast/aviso bonito
+  const [showToast, setShowToast] = useState(false);
+
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/categoria/ropa_perro`)
       .then((res) => {
@@ -35,6 +38,20 @@ export default function RopaPerrosPage() {
 
   function handleBack() {
     router.back();
+  }
+
+  // Función para agregar el producto al carrito
+  function handleAddToCart(product: Product) {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existing = cart.find((item: any) => item.id === product.id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ ...product, quantity: 1 });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 1500);
   }
 
   return (
@@ -76,12 +93,23 @@ export default function RopaPerrosPage() {
             <p className="text-gray-500 mb-2 text-center text-sm sm:text-base line-clamp-2">
               {prod.description}
             </p>
-            <span className="text-teal-700 font-bold text-lg sm:text-xl mb-2">
-              ${prod.price.toLocaleString()}
-            </span>
+            {/* Botón para agregar al carrito */}
+            <button
+              className="mt-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded font-semibold transition"
+              onClick={() => handleAddToCart(prod)}
+            >
+              Agregar al carrito
+            </button>
+            <span className="text-teal-700 font-bold text-lg sm:text-xl mb-2">${prod.price?.toLocaleString()}</span>
           </Link>
         ))}
       </div>
+      {/* Toast bonito para feedback visual */}
+      {showToast && (
+        <div className="fixed bottom-6 right-6 bg-teal-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+          ¡Producto agregado al carrito!
+        </div>
+      )}
     </main>
   );
 }

@@ -21,6 +21,7 @@ export default function DetalleProductoPerro({ params }: { params: { id: string 
   const [producto, setProducto] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -38,6 +39,26 @@ export default function DetalleProductoPerro({ params }: { params: { id: string 
     router.back();
   }
 
+  // Función para agregar el producto al carrito
+  function handleAddToCart(product: Product) {
+    // Leer el carrito actual de localStorage (o array vacío si no existe)
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    // Buscar si el producto ya está en el carrito
+    const existing = cart.find((item: any) => item.id === product.id);
+    if (existing) {
+      // Si ya está, solo aumentamos la cantidad
+      existing.quantity += 1;
+    } else {
+      // Si no está, lo agregamos con cantidad 1
+      cart.push({ ...product, quantity: 1 });
+    }
+    // Guardar el carrito actualizado en localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    // Feedback visual mejorado (toast simple)
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 1500);
+  }
+
   if (loading) return <main className="flex items-center justify-center min-h-[60vh]"><p className="text-gray-500">Cargando producto...</p></main>;
   if (error) return <main className="flex items-center justify-center min-h-[60vh]"><p className="text-red-600">{error}</p></main>;
   if (!producto) return null;
@@ -46,15 +67,31 @@ export default function DetalleProductoPerro({ params }: { params: { id: string 
     <main className="min-h-[80vh] flex flex-col items-center bg-gray-50 py-10 px-2 sm:px-4">
       <button onClick={handleBack} className="mb-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700 font-semibold self-start">← Volver atrás</button>
       <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 max-w-xl w-full flex flex-col items-center">
-        <div className="mb-4 w-full h-52 relative flex items-center justify-center">
+        <div className="mb-4 w-full h-52 relative flex items-center justify-center group">
           {producto.imageUrl ? (
-            <Image src={producto.imageUrl} alt={producto.name} fill className="object-contain rounded-lg" sizes="(max-width: 768px) 100vw, 50vw" />
+            <>
+              <Image src={producto.imageUrl} alt={producto.name} fill className="object-contain rounded-lg" sizes="(max-width: 768px) 100vw, 50vw" />
+              {/* Botón centrado sobre la imagen */}
+              {/* <button
+                className="absolute bottom-3 left-1/2 -translate-x-1/2 px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded font-semibold shadow-lg opacity-90 group-hover:opacity-100 transition"
+                onClick={() => handleAddToCart(producto)}
+              >
+                Agregar al carrito
+              </button> */}
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">Sin imagen</div>
           )}
         </div>
         <h1 className="text-2xl font-bold text-gray-800 mb-2 text-center">{producto.name}</h1>
         <p className="text-gray-600 mb-3 text-center">{producto.description}</p>
+        {/* Botón centrado arriba del precio */}
+        <button
+          className="mb-3 px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded font-semibold shadow-lg transition"
+          onClick={() => handleAddToCart(producto)}
+        >
+          Agregar al carrito
+        </button>
         <span className="text-teal-700 font-bold text-xl mb-2">${producto.price.toLocaleString()}</span>
         <span className="text-gray-500 text-sm mb-2">Stock: {producto.stock}</span>
         {producto.images && producto.images.length > 0 && (
@@ -67,6 +104,12 @@ export default function DetalleProductoPerro({ params }: { params: { id: string 
           </div>
         )}
       </div>
+      {/* Toast bonito para feedback visual */}
+      {showToast && (
+        <div className="fixed bottom-6 right-6 bg-teal-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+          ¡Producto agregado al carrito!
+        </div>
+      )}
     </main>
   );
 }

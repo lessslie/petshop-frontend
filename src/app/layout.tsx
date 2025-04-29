@@ -2,7 +2,7 @@ import './globals.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { UserProvider } from '../context/UserContext'; 
-
+import Link from "next/link";
 
 export const metadata = {
   title: 'Pelu PetShop',
@@ -12,11 +12,13 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body style={{ margin: 0, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <body className="bg-gray-50 min-h-screen">
         <UserProvider>
-          <Header />
-          <div style={{ flex: 1 }}>{children}</div>
-          <Footer />
+          <main>
+            <Header />
+            <div style={{ flex: 1 }}>{children}</div>
+            <Footer />
+          </main>
         </UserProvider>
       </body>
     </html>

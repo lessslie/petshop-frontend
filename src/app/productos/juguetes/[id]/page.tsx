@@ -21,6 +21,7 @@ export default function DetalleJuguete({ params }: { params: { id: string } }) {
   const [producto, setProducto] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -36,6 +37,19 @@ export default function DetalleJuguete({ params }: { params: { id: string } }) {
 
   function handleBack() {
     router.back();
+  }
+
+  function handleAddToCart(product: Product) {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existing = cart.find((item: any) => item.id === product.id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ ...product, quantity: 1 });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 1500);
   }
 
   if (loading) return <main className="flex items-center justify-center min-h-[60vh]"><p className="text-gray-500">Cargando producto...</p></main>;
@@ -55,6 +69,12 @@ export default function DetalleJuguete({ params }: { params: { id: string } }) {
         </div>
         <h1 className="text-2xl font-bold text-gray-800 mb-2 text-center">{producto.name}</h1>
         <p className="text-gray-600 mb-3 text-center">{producto.description}</p>
+        <button
+          className="mb-3 px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded font-semibold shadow-lg transition"
+          onClick={() => handleAddToCart(producto)}
+        >
+          Agregar al carrito
+        </button>
         <span className="text-teal-700 font-bold text-xl mb-2">${producto.price.toLocaleString()}</span>
         <span className="text-gray-500 text-sm mb-2">Stock: {producto.stock}</span>
         {producto.images && producto.images.length > 0 && (
@@ -67,6 +87,11 @@ export default function DetalleJuguete({ params }: { params: { id: string } }) {
           </div>
         )}
       </div>
+      {showToast && (
+        <div className="fixed bottom-6 right-6 bg-teal-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+          ¡Producto agregado al carrito!
+        </div>
+      )}
     </main>
   );
 }

@@ -37,6 +37,29 @@ export default function AlimentosPerrosPage() {
     router.back();
   }
 
+  // Estado para mostrar un toast/aviso bonito
+  const [showToast, setShowToast] = useState(false);
+
+  // Función para agregar el producto al carrito
+  function handleAddToCart(product: Product) {
+    // Leer el carrito actual de localStorage (o array vacío si no existe)
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    // Buscar si el producto ya está en el carrito
+    const existing = cart.find((item: any) => item.id === product.id);
+    if (existing) {
+      // Si ya está, solo aumentamos la cantidad
+      existing.quantity += 1;
+    } else {
+      // Si no está, lo agregamos con cantidad 1
+      cart.push({ ...product, quantity: 1 });
+    }
+    // Guardar el carrito actualizado en localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    // Feedback visual mejorado (toast simple)
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 1500);
+  }
+
   return (
     <main className="min-h-[80vh] flex flex-col items-center bg-gray-50 py-10 px-2 sm:px-4">
       <button onClick={handleBack} className="mb-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700 font-semibold self-start">← Volver atrás</button>
@@ -45,7 +68,10 @@ export default function AlimentosPerrosPage() {
       {error && <p className="text-red-600">{error}</p>}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
         {productos.map((prod) => (
-          <Link key={prod.id} href={`/productos/alimentos/perros/${prod.id}`} className="bg-white rounded-xl shadow-md border border-gray-200 flex flex-col items-center p-4 sm:p-6 hover:shadow-lg transition min-w-[200px] max-w-xs mx-auto w-full overflow-hidden cursor-pointer">
+          <div
+            key={prod.id}
+            className="bg-white rounded-xl shadow-md border border-gray-200 flex flex-col items-center p-4 sm:p-6 hover:shadow-lg transition min-w-[200px] max-w-xs mx-auto w-full overflow-hidden"
+          >
             <div className="mb-3 w-full h-32 relative flex items-center justify-center">
               {prod.imageUrl ? (
                 <Image src={prod.imageUrl} alt={prod.name} fill className="object-contain rounded-lg" sizes="(max-width: 768px) 100vw, 33vw" />
@@ -55,10 +81,23 @@ export default function AlimentosPerrosPage() {
             </div>
             <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-1 mt-2 text-center break-words">{prod.name}</h2>
             <p className="text-gray-500 mb-2 text-center text-sm sm:text-base line-clamp-2">{prod.description}</p>
-            <span className="text-teal-700 font-bold text-lg sm:text-xl mb-2">${prod.price.toLocaleString()}</span>
-          </Link>
+            {/* Botón para agregar al carrito */}
+            <button
+              className="mt-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded font-semibold transition"
+              onClick={() => handleAddToCart(prod)}
+            >
+              Agregar al carrito
+            </button>
+            <span className="text-teal-700 font-bold text-lg sm:text-xl mb-2">${prod.price?.toLocaleString()}</span>
+          </div>
         ))}
       </div>
+      {/* Toast bonito para feedback visual */}
+      {showToast && (
+        <div className="fixed bottom-6 right-6 bg-teal-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+          ¡Producto agregado al carrito!
+        </div>
+      )}
     </main>
   );
 }
