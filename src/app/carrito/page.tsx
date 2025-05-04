@@ -110,7 +110,7 @@ export default function CarritoPage() {
           {cart.map((item) => (
             <div key={item.id} className="flex items-center gap-4 border-b border-gray-100 py-4 last:border-b-0">
               {item.imageUrl && (
-                <Image src={item.imageUrl} alt={item.name} className="w-20 h-20 object-contain rounded" />
+                <Image src={item.imageUrl} alt={item.name} width={80} height={80} className="w-20 h-20 object-contain rounded" />
               )}
               <div className="flex-1">
                 <div className="font-semibold text-gray-800">{item.name}</div>
