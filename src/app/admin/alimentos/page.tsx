@@ -161,6 +161,7 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
     price: initial?.price || '',
     stock: initial?.stock || '',
     imageUrl: initial?.imageUrl || '',
+    category: initial?.category || 'alimento_perro',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -176,7 +177,7 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
     if (!saving) setError('');
   }, [saving]);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
   }
 
@@ -194,7 +195,7 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ ...form, price: Number(form.price), stock: Number(form.stock), category: 'alimento_perro' }),
+        body: JSON.stringify({ ...form, price: Number(form.price), stock: Number(form.stock) }),
       });
       if (!res.ok) throw new Error('Error al guardar');
       const prod = await res.json();
@@ -226,6 +227,18 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
       </label>
       <label className="font-semibold">URL de imagen
         <input name="imageUrl" value={form.imageUrl} onChange={handleChange} className="border rounded px-2 py-1 w-full" />
+      </label>
+      <label className="font-semibold">Categoría
+        <select
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          className="border rounded px-2 py-1 w-full"
+          required
+        >
+          <option value="alimento_perro">Alimento para perro</option>
+          <option value="alimento_gato">Alimento para gato</option>
+        </select>
       </label>
       {error && <p className="text-red-600">{error}</p>}
       <div className="flex gap-2 mt-2">
