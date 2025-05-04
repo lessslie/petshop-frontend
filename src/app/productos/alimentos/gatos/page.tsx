@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -40,7 +39,7 @@ export default function AlimentosGatosPage() {
 
   function handleAddToCart(product: Product) {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existing = cart.find((item: any) => item.id === product.id);
+    const existing = cart.find((item: Product) => item.id === product.id);
     if (existing) {
       existing.quantity += 1;
     } else {

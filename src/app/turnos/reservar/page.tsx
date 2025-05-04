@@ -43,7 +43,7 @@ function ReservaTurnoPage() {
     userId: userId || '',
   });
   const [error, setError] = useState('');
-  const [precios, setPrecios] = useState<any>(null);
+  const [precios, setPrecios] = useState<{ [key: string]: { [key: string]: number } } | null>(null);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/servicios`)

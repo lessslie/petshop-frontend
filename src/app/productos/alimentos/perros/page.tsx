@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -45,7 +44,7 @@ export default function AlimentosPerrosPage() {
     // Leer el carrito actual de localStorage (o array vacío si no existe)
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     // Buscar si el producto ya está en el carrito
-    const existing = cart.find((item: any) => item.id === product.id);
+    const existing = cart.find((item: Product) => item.id === product.id);
     if (existing) {
       // Si ya está, solo aumentamos la cantidad
       existing.quantity += 1;

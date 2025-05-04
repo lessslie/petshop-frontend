@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import toast from 'react-hot-toast'; // Import toast
+import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 interface CartItem {
   id: string;
@@ -72,11 +73,17 @@ export default function CarritoPage() {
         body: JSON.stringify({ items: orderItems })
       });
       if (!res.ok) throw new Error("No se pudo crear la orden");
+      const data = await res.json();
+      if (data.mercadoPagoUrl) {
+        // Redirigir a Mercado Pago
+        window.location.href = data.mercadoPagoUrl;
+        return;
+      }
       localStorage.removeItem("cart");
       setCart([]);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 1800);
-    } catch (e) {
+    } catch {
       alert("Error al finalizar la compra");
     }
   };
@@ -103,7 +110,7 @@ export default function CarritoPage() {
           {cart.map((item) => (
             <div key={item.id} className="flex items-center gap-4 border-b border-gray-100 py-4 last:border-b-0">
               {item.imageUrl && (
-                <img src={item.imageUrl} alt={item.name} className="w-20 h-20 object-contain rounded" />
+                <Image src={item.imageUrl} alt={item.name} className="w-20 h-20 object-contain rounded" />
               )}
               <div className="flex-1">
                 <div className="font-semibold text-gray-800">{item.name}</div>

@@ -2,7 +2,6 @@ import './globals.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { UserProvider } from '../context/UserContext'; 
-import Link from "next/link";
 
 export const metadata = {
   title: 'Pelu PetShop',
