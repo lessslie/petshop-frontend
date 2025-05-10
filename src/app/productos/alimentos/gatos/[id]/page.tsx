@@ -18,12 +18,19 @@ interface Product {
   videoUrl?: string;
 }
 
-export default function DetalleProductoGato({ params }: { params: { id: string } }) {
+export default function DetalleProductoGato({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const id = params.id;
+  const [id, setId] = useState<string>('');
   const [producto, setProducto] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Extraer el id de los parámetros que son ahora una promesa
+    params.then(resolvedParams => {
+      setId(resolvedParams.id);
+    });
+  }, [params]);
 
   useEffect(() => {
     if (!id) return;
