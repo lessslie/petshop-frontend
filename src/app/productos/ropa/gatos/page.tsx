@@ -14,7 +14,7 @@ interface Product {
   price: number;
   stock: number;
   category: string;
-  imageUrl?: string[];
+  imageUrl?: string | string[];
   videoUrl?: string;
 }
 
@@ -46,12 +46,39 @@ export default function RopaGatosPage() {
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({ ...product, quantity: 1 });
+      let imageString = '';
+      if (Array.isArray(product.imageUrl)) {
+        imageString = product.imageUrl.find(img => 
+          typeof img === 'string' && 
+          img.trim() !== '' && 
+          !img.includes('/admin/')
+        ) || '';
+      } else if (
+        typeof product.imageUrl === 'string' && 
+        product.imageUrl.trim() !== '' && 
+        !product.imageUrl.includes('/admin/')
+      ) {
+        imageString = product.imageUrl;
+      }
+      cart.push({ ...product, quantity: 1, imageUrl: imageString });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
     setShowToast(true);
     setTimeout(() => setShowToast(false), 1500);
   }
+
+  // Configuración para el slider
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    accessibility: true,
+    arrows: true,
+  };
 
   return (
     <main className="min-h-[80vh] flex flex-col items-center bg-gray-50 py-10 px-2 sm:px-4">
@@ -77,26 +104,18 @@ export default function RopaGatosPage() {
               )}
               {prod.imageUrl ? (
                 Array.isArray(prod.imageUrl) && prod.imageUrl.length > 1 ? (
-                  <Slider
-                    dots={true}
-                    infinite={true}
-                    speed={500}
-                    slidesToShow={1}
-                    slidesToScroll={1}
-                    autoplay={true}
-                    autoplaySpeed={3000}
-                    className="w-full h-60"
-                  >
+                  <Slider {...sliderSettings} className="w-full h-60">
                     {prod.imageUrl.map((img: string, idx: number) => (
                       <div key={idx} className="w-full h-60 flex items-center justify-center relative">
-                        <Image
-                          src={img}
-                          alt={prod.name + ' ' + (idx + 1)}
-                          fill
-                          className="object-contain rounded-lg"
-                          style={{ width: '100%', height: '100%', maxHeight: '240px', maxWidth: '100%' }}
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                        />
+                        <div className="w-full h-60 relative">
+                          <Image
+                            src={img}
+                            alt={prod.name + ' ' + (idx + 1)}
+                            fill
+                            className="object-contain rounded-lg"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                          />
+                        </div>
                       </div>
                     ))}
                   </Slider>
@@ -107,7 +126,6 @@ export default function RopaGatosPage() {
                       alt={prod.name}
                       fill
                       className="object-contain rounded-lg"
-                      style={{ width: '100%', height: '100%', maxHeight: '240px', maxWidth: '100%' }}
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
                   </div>

@@ -14,7 +14,7 @@ interface Product {
   price: number;
   stock: number;
   category: string;
-  imageUrl?: string[];
+  imageUrl?: string | string[];
   videoUrl?: string;
 }
 
@@ -55,7 +55,26 @@ export default function DetalleJuguete({ params }: { params: Promise<{ id: strin
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({ ...product, quantity: 1 });
+      let imageString = '';
+      if (Array.isArray(product.imageUrl)) {
+        imageString = (product.imageUrl as string[]).find(
+          img =>
+            typeof img === 'string' &&
+            typeof img.trim === 'function' &&
+            img.trim() !== '' &&
+            typeof img.includes === 'function' &&
+            !img.includes('/admin/')
+        ) || '';
+      } else if (
+        typeof product.imageUrl === 'string' &&
+        typeof product.imageUrl.trim === 'function' &&
+        product.imageUrl.trim() !== '' &&
+        typeof product.imageUrl.includes === 'function' &&
+        !product.imageUrl.includes('/admin/')
+      ) {
+        imageString = product.imageUrl;
+      }
+      cart.push({ ...product, quantity: 1, imageUrl: imageString });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
     setShowToast(true);
@@ -66,32 +85,50 @@ export default function DetalleJuguete({ params }: { params: Promise<{ id: strin
   if (error) return <main className="flex items-center justify-center min-h-[60vh]"><p className="text-red-600">{error}</p></main>;
   if (!producto) return null;
 
+  // Configuración para el slider
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    accessibility: true,
+    arrows: true,
+  };
+
   return (
     <main className="min-h-[80vh] flex flex-col items-center bg-gray-50 py-10 px-2 sm:px-4">
       <button onClick={handleBack} className="mb-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700 font-semibold self-start">← Volver atrás</button>
       <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 max-w-xl w-full flex flex-col items-center">
-        <div className="mb-4 w-full h-52 relative flex items-center justify-center">
+        <div className="mb-4 w-full h-64 relative flex items-center justify-center">
           {producto.imageUrl ? (
             Array.isArray(producto.imageUrl) && producto.imageUrl.length > 1 ? (
-              <Slider
-                dots={true}
-                infinite={true}
-                speed={500}
-                slidesToShow={1}
-                slidesToScroll={1}
-                autoplay={true}
-                autoplaySpeed={3000}
-                className="w-full h-40"
-              >
+              <Slider {...sliderSettings} className="w-full h-64">
                 {producto.imageUrl.map((img: string, idx: number) => (
-                  <div key={idx} className="w-full h-40 flex items-center justify-center relative">
-                    <Image src={img} alt={producto.name + ' ' + (idx + 1)} fill className="object-contain rounded-lg" sizes="(max-width: 768px) 100vw, 33vw" />
+                  <div key={idx} className="w-full h-64 flex items-center justify-center relative">
+                    <div className="w-full h-64 relative">
+                      <Image
+                        src={img}
+                        alt={producto.name + ' ' + (idx + 1)}
+                        fill
+                        className="object-contain rounded-lg"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    </div>
                   </div>
                 ))}
               </Slider>
             ) : (
-              <div className="w-full h-40 relative">
-                <Image src={Array.isArray(producto.imageUrl) ? producto.imageUrl[0] : producto.imageUrl} alt={producto.name} fill className="object-contain rounded-lg" sizes="(max-width: 768px) 100vw, 33vw" />
+              <div className="w-full h-64 relative">
+                <Image
+                  src={Array.isArray(producto.imageUrl) ? producto.imageUrl[0] : producto.imageUrl}
+                  alt={producto.name}
+                  fill
+                  className="object-contain rounded-lg"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
               </div>
             )
           ) : (

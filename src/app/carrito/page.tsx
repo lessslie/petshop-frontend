@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
-import Image from 'next/image';
 
 interface CartItem {
   id: string;
@@ -109,9 +108,7 @@ export default function CarritoPage() {
           </button>
           {cart.map((item) => (
             <div key={item.id} className="flex items-center gap-4 border-b border-gray-100 py-4 last:border-b-0">
-              {item.imageUrl && (
-                <Image src={item.imageUrl} alt={item.name} width={80} height={80} className="w-20 h-20 object-contain rounded" />
-              )}
+
               <div className="flex-1">
                 <div className="font-semibold text-gray-800">{item.name}</div>
                 <div className="text-teal-700 font-bold">${item.price.toLocaleString()}</div>

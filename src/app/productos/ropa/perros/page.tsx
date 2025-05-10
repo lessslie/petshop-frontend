@@ -15,7 +15,7 @@ interface Product {
   price: number;
   stock: number;
   category: string;
-  imageUrl?: string[];
+  imageUrl?: string | string[];
   videoUrl?: string;
 }
 
@@ -50,12 +50,40 @@ export default function RopaPerrosPage() {
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({ ...product, quantity: 1 });
+      let imageString = '';
+      if (Array.isArray(product.imageUrl)) {
+        imageString = product.imageUrl.find(
+          img =>
+            typeof img === 'string' &&
+            img.trim() !== '' &&
+            !img.includes('/admin/')
+        ) || '';
+      } else if (
+        typeof product.imageUrl === 'string' &&
+        product.imageUrl.trim() !== '' &&
+        !product.imageUrl.includes('/admin/')
+      ) {
+        imageString = product.imageUrl;
+      }
+      cart.push({ ...product, quantity: 1, imageUrl: imageString });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
     setShowToast(true);
     setTimeout(() => setShowToast(false), 1500);
   }
+
+  // Configuración para el slider
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    accessibility: true,
+    arrows: true,
+  };
 
   return (
     <main className="min-h-[80vh] flex flex-col items-center bg-gray-50 py-10 px-2 sm:px-4">
@@ -70,63 +98,55 @@ export default function RopaPerrosPage() {
       {error && <p className="text-red-600">{error}</p>}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
         {productos.map((prod) => (
-          <Link
+          <div
             key={prod.id}
-            href={`/productos/ropa/${prod.id}`}
-            className="bg-white rounded-xl shadow-md border border-gray-200 flex flex-col items-center p-4 sm:p-6 hover:shadow-lg transition min-w-[200px] max-w-xs mx-auto w-full overflow-hidden cursor-pointer"
+            className="bg-white rounded-xl shadow-md border border-gray-200 flex flex-col items-center p-4 sm:p-6 hover:shadow-lg transition min-w-[200px] max-w-xs mx-auto w-full overflow-hidden"
           >
-            <div className="mb-6 w-full h-60 relative flex flex-col items-center justify-center">
-              {/* Mostrar cuántas imágenes tiene el producto */}
-              {prod.imageUrl && Array.isArray(prod.imageUrl) && (
-                <div className="text-xs text-gray-400 mb-1">{prod.imageUrl.length} imagen{prod.imageUrl.length === 1 ? '' : 'es'}</div>
-              )}
-              {prod.imageUrl ? (
-                Array.isArray(prod.imageUrl) && prod.imageUrl.length > 1 ? (
-                  <Slider
-                    dots={true}
-                    infinite={true}
-                    speed={500}
-                    slidesToShow={1}
-                    slidesToScroll={1}
-                    autoplay={true}
-                    autoplaySpeed={3000}
-                    className="w-full h-60"
-                  >
-                    {prod.imageUrl.map((img: string, idx: number) => (
-                      <div key={idx} className="w-full h-60 flex items-center justify-center relative">
-                        <Image
-                          src={img}
-                          alt={prod.name + ' ' + (idx + 1)}
-                          fill
-                          className="object-contain rounded-lg"
-                          style={{ width: '100%', height: '100%', maxHeight: '240px', maxWidth: '100%' }}
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                        />
-                      </div>
-                    ))}
-                  </Slider>
+            <Link href={`/productos/ropa/${prod.id}`} className="w-full">
+              <div className="mb-6 w-full h-60 relative flex flex-col items-center justify-center">
+                {/* Mostrar cuántas imágenes tiene el producto */}
+                {prod.imageUrl && Array.isArray(prod.imageUrl) && (
+                  <div className="text-xs text-gray-400 mb-1">{prod.imageUrl.length} imagen{prod.imageUrl.length === 1 ? '' : 'es'}</div>
+                )}
+                {prod.imageUrl ? (
+                  Array.isArray(prod.imageUrl) && prod.imageUrl.length > 1 ? (
+                    <Slider {...sliderSettings} className="w-full h-52">
+                      {prod.imageUrl.map((img: string, idx: number) => (
+                        <div key={idx} className="w-full h-52 flex items-center justify-center relative">
+                          <div className="w-full h-52 relative">
+                            <Image
+                              src={img}
+                              alt={prod.name + ' ' + (idx + 1)}
+                              fill
+                              className="object-contain rounded-lg"
+                              sizes="(max-width: 768px) 100vw, 33vw"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </Slider>
+                  ) : (
+                    <div className="w-full h-52 relative">
+                      <Image
+                        src={Array.isArray(prod.imageUrl) ? prod.imageUrl[0] : prod.imageUrl}
+                        alt={prod.name}
+                        fill
+                        className="object-contain rounded-lg"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    </div>
+                  )
                 ) : (
-                  <div className="w-full h-60 relative">
-                    <Image
-                      src={Array.isArray(prod.imageUrl) ? prod.imageUrl[0] : prod.imageUrl}
-                      alt={prod.name}
-                      fill
-                      className="object-contain rounded-lg"
-                      style={{ width: '100%', height: '100%', maxHeight: '240px', maxWidth: '100%' }}
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  </div>
-                )
-              ) : (
-                <div className="w-full h-60 flex items-center justify-center bg-gray-100 text-gray-400">Sin imagen</div>
-              )}
-              {prod.videoUrl && (
-                <video controls width={300} className="rounded-lg mx-auto mt-2 max-h-60">
-                  <source src={prod.videoUrl} type="video/mp4" />
-                  Tu navegador no soporta video.
-                </video>
-              )}
-            </div>
+                  <div className="w-full h-52 flex items-center justify-center bg-gray-100 text-gray-400">Sin imagen</div>
+                )}
+                {prod.videoUrl && (
+                  <video controls width={300} className="rounded-lg mx-auto mt-2 max-h-60">
+                    <source src={prod.videoUrl} type="video/mp4" />
+                    Tu navegador no soporta video.
+                  </video>
+                )}
+              </div>
+            </Link>
             <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-1 mt-2 text-center break-words">
               {prod.name}
             </h2>
@@ -141,7 +161,7 @@ export default function RopaPerrosPage() {
               Agregar al carrito
             </button>
             <span className="text-teal-700 font-bold text-lg sm:text-xl mb-2">${prod.price?.toLocaleString()}</span>
-          </Link>
+          </div>
         ))}
       </div>
       {/* Toast bonito para feedback visual */}
