@@ -110,86 +110,64 @@ export default function AdminAlimentos() {
       <div className="overflow-x-auto flex flex-col gap-10">
         <div>
           <h2 className="text-xl font-bold mb-2 text-teal-700">Alimentos para Perro</h2>
-          <table className="min-w-full bg-white rounded-xl shadow-md mb-6">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="py-2 px-3">Imagen</th>
-                <th className="py-2 px-3">Nombre</th>
-                <th className="py-2 px-3">Precio</th>
-                <th className="py-2 px-3">Stock</th>
-                <th className="py-2 px-3">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productosPerro.map(prod => (
-                <tr key={prod.id} className="border-b last:border-b-0">
-                  <td className="py-2 px-3">
-                    <div className="flex gap-1">
-                      {prod.imageUrl && prod.imageUrl.slice(0, 3).map((img: string, idx: number) => (
-                        <Image
-                          key={idx}
-                          src={img}
-                          alt={`${prod.name} ${idx + 1}`}
-                          width={40}
-                          height={40}
-                          style={{ objectFit: 'contain', borderRadius: 6 }}
-                        />
-                      ))}
-                    </div>
-                  </td>
-                  <td className="py-2 px-3">{prod.name}</td>
-                  <td className="py-2 px-3">${prod.price.toLocaleString()}</td>
-                  <td className="py-2 px-3">{prod.stock}</td>
-                  <td className="py-2 px-3 flex gap-2">
-                    <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" onClick={() => handleEdit(prod)}>Editar</button>
-                    <button className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" onClick={() => handleDelete(prod.id)}>Eliminar</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {productosPerro.map(prod => (
+              <div key={prod.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex gap-2 items-center">
+                  {prod.imageUrl && prod.imageUrl.slice(0, 1).map((img: string, idx: number) => (
+                    <Image
+                      key={idx}
+                      src={img}
+                      alt={`${prod.name} ${idx + 1}`}
+                      width={60}
+                      height={60}
+                      style={{ objectFit: 'contain', borderRadius: 8 }}
+                    />
+                  ))}
+                </div>
+                <div className="flex-1 w-full flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                  <div className="font-semibold text-teal-700">{prod.name}</div>
+                  <div className="text-gray-700">${prod.price.toLocaleString()}</div>
+                  <div className="text-gray-500 text-sm">Stock: {prod.stock}</div>
+                </div>
+                <div className="flex gap-2 mt-2 sm:mt-0">
+                  <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" onClick={() => handleEdit(prod)}>Editar</button>
+                  <button className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" onClick={() => handleDelete(prod.id)}>Eliminar</button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
         <div>
           <h2 className="text-xl font-bold mb-2 text-fuchsia-700">Alimentos para Gato</h2>
-          <table className="min-w-full bg-white rounded-xl shadow-md">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="py-2 px-3">Imagen</th>
-                <th className="py-2 px-3">Nombre</th>
-                <th className="py-2 px-3">Precio</th>
-                <th className="py-2 px-3">Stock</th>
-                <th className="py-2 px-3">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productosGato.map(prod => (
-                <tr key={prod.id} className="border-b last:border-b-0">
-                  <td className="py-2 px-3">
-                    <div className="flex gap-1">
-                      {prod.imageUrl && prod.imageUrl.slice(0, 3).map((img: string, idx: number) => (
-                        <Image
-                          key={idx}
-                          src={img}
-                          alt={`${prod.name} ${idx + 1}`}
-                          width={40}
-                          height={40}
-                          style={{ objectFit: 'contain', borderRadius: 6 }}
-                        />
-                      ))}
-                    </div>
-                  </td>
-                  <td className="py-2 px-3">{prod.name}</td>
-                  <td className="py-2 px-3">${prod.price.toLocaleString()}</td>
-                  <td className="py-2 px-3">{prod.stock}</td>
-                  <td className="py-2 px-3 flex gap-2">
-                    <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" onClick={() => handleEdit(prod)}>Editar</button>
-                    <button className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" onClick={() => handleDelete(prod.id)}>Eliminar</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {productosGato.map(prod => (
+              <div key={prod.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex gap-2 items-center">
+                  {prod.imageUrl && prod.imageUrl.slice(0, 1).map((img: string, idx: number) => (
+                    <Image
+                      key={idx}
+                      src={img}
+                      alt={`${prod.name} ${idx + 1}`}
+                      width={60}
+                      height={60}
+                      style={{ objectFit: 'contain', borderRadius: 8 }}
+                    />
+                  ))}
+                </div>
+                <div className="flex-1 w-full flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                  <div className="font-semibold text-fuchsia-700">{prod.name}</div>
+                  <div className="text-gray-700">${prod.price.toLocaleString()}</div>
+                  <div className="text-gray-500 text-sm">Stock: {prod.stock}</div>
+                </div>
+                <div className="flex gap-2 mt-2 sm:mt-0">
+                  <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" onClick={() => handleEdit(prod)}>Editar</button>
+                  <button className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" onClick={() => handleDelete(prod.id)}>Eliminar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+      </div>
       </div>
       {/* Modal para editar/agregar producto */}
       {modalOpen && (
