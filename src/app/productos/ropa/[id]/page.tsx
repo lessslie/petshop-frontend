@@ -11,8 +11,8 @@ interface Product {
   price: number;
   stock: number;
   category: string;
-  imageUrl?: string;
-  images?: string[];
+  imageUrl?: string[];
+  videoUrl?: string;
 }
 
 export default function DetalleRopa({ params }: { params: { id: string } }) {
@@ -62,7 +62,7 @@ export default function DetalleRopa({ params }: { params: { id: string } }) {
       <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 max-w-xl w-full flex flex-col items-center">
         <div className="mb-4 w-full h-52 relative flex items-center justify-center">
           {producto.imageUrl ? (
-            <Image src={producto.imageUrl} alt={producto.name} fill className="object-contain rounded-lg" sizes="(max-width: 768px) 100vw, 50vw" />
+            <Image src={Array.isArray(producto.imageUrl) ? producto.imageUrl[0] : producto.imageUrl} alt={producto.name} fill className="object-contain rounded-lg" sizes="(max-width: 768px) 100vw, 50vw" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">Sin imagen</div>
           )}
@@ -77,14 +77,20 @@ export default function DetalleRopa({ params }: { params: { id: string } }) {
         </button>
         <span className="text-teal-700 font-bold text-xl mb-2">${producto.price.toLocaleString()}</span>
         <span className="text-gray-500 text-sm mb-2">Stock: {producto.stock}</span>
-        {producto.images && producto.images.length > 0 && (
+        {Array.isArray(producto.imageUrl) && producto.imageUrl.length > 0 && (
           <div className="flex gap-2 mt-4 flex-wrap justify-center">
-            {producto.images.map((img, idx) => (
+            {producto.imageUrl.map((img: string, idx: number) => (
               <div key={idx} className="w-20 h-20 relative">
                 <Image src={img} alt={`Imagen adicional ${idx+1}`} fill className="object-cover rounded-md" />
               </div>
             ))}
           </div>
+        )}
+        {producto.videoUrl && (
+          <video controls width={300} className="rounded-lg mx-auto mt-4 max-h-60">
+            <source src={producto.videoUrl} type="video/mp4" />
+            Tu navegador no soporta video.
+          </video>
         )}
       </div>
       {showToast && (

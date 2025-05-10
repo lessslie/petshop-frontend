@@ -10,8 +10,8 @@ interface Product {
   price: number;
   stock: number;
   category: string;
-  imageUrl?: string;
-  images?: string[];
+  imageUrl?: string[];
+  videoUrl?: string;
 }
 
 export default function AdminJuguetes() {
@@ -114,17 +114,30 @@ export default function AdminJuguetes() {
             {productos.map(prod => (
               <tr key={prod.id} className="border-b last:border-b-0">
                 <td className="py-2 px-3">
-                  {prod.imageUrl ? (
-                    <Image
-                      src={prod.imageUrl}
-                      alt={prod.name}
-                      width={80}
-                      height={80}
-                      style={{ objectFit: 'contain' }}
-                    />
-                  ) : (
-                    <span className="text-gray-400">Sin imagen</span>
-                  )}
+                  {Array.isArray(prod.imageUrl) && prod.imageUrl.length > 0 ? (
+  <div className="flex flex-col gap-1">
+    <div className="flex gap-1">
+      {prod.imageUrl.slice(0, 3).map((img: string, idx: number) => (
+        <Image
+          key={idx}
+          src={img}
+          alt={`${prod.name} ${idx + 1}`}
+          width={40}
+          height={40}
+          style={{ objectFit: 'contain', borderRadius: 6 }}
+        />
+      ))}
+    </div>
+    {prod.videoUrl && (
+      <video controls width={80} height={40} style={{ borderRadius: 6, marginTop: 4 }}>
+        <source src={prod.videoUrl} type="video/mp4" />
+        Tu navegador no soporta video.
+      </video>
+    )}
+  </div>
+) : (
+  <span className="text-gray-400">Sin imagen</span>
+) }
                 </td>
                 <td className="py-2 px-3">{prod.name}</td>
                 <td className="py-2 px-3">${prod.price.toLocaleString()}</td>
@@ -141,7 +154,7 @@ export default function AdminJuguetes() {
       {/* Modal para editar/agregar producto */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
+          <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-md mx-2 sm:mx-4 md:mx-0">
             <h2 className="text-xl font-bold mb-4">{editing ? 'Editar juguete' : 'Agregar juguete'}</h2>
             <ProductForm 
               initial={editing}
@@ -177,7 +190,10 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
     description: initial?.description || '',
     price: initial?.price || '',
     stock: initial?.stock || '',
-    imageUrl: initial?.imageUrl || '',
+    imageUrl1: initial?.imageUrl?.[0] || '',
+    imageUrl2: initial?.imageUrl?.[1] || '',
+    imageUrl3: initial?.imageUrl?.[2] || '',
+    videoUrl: initial?.videoUrl || '',
     category: initial?.category || 'juguetes_perro',
   });
   const [saving, setSaving] = useState(false);
@@ -206,13 +222,24 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
       const token = getToken();
       const method = initial ? 'PUT' : 'POST';
       const url = initial ? `${process.env.NEXT_PUBLIC_API_URL}/products/${initial.id}` : `${process.env.NEXT_PUBLIC_API_URL}/products`;
+      // Juntar las imágenes en un array y filtrar vacíos
+      const imageUrl = [form.imageUrl1, form.imageUrl2, form.imageUrl3].filter(Boolean);
+      const videoUrl = form.videoUrl || undefined;
       const res = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ ...form, price: Number(form.price), stock: Number(form.stock) }),
+        body: JSON.stringify({
+          name: form.name,
+          description: form.description,
+          price: Number(form.price),
+          stock: Number(form.stock),
+          imageUrl,
+          videoUrl,
+          category: form.category,
+        }),
       });
       if (!res.ok) throw new Error('Error al guardar');
       const prod = await res.json();
@@ -229,32 +256,47 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
   }
 
   return (
-    <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
-      <label className="font-semibold">Nombre
+    <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
+      <label className="font-semibold flex flex-col gap-1">Nombre
         <input name="name" value={form.name} onChange={handleChange} className="border rounded px-2 py-1 w-full" required />
       </label>
-      <label className="font-semibold">Descripción
-        <textarea name="description" value={form.description} onChange={handleChange} className="border rounded px-2 py-1 w-full" required />
+      <label className="font-semibold flex flex-col gap-1">Descripción
+        <textarea name="description" value={form.description} onChange={handleChange} className="border rounded px-2 py-1 w-full resize-none" required rows={3} />
       </label>
-      <label className="font-semibold">Precio
+      <label className="font-semibold flex flex-col gap-1">Precio
         <input name="price" type="number" value={form.price} onChange={handleChange} className="border rounded px-2 py-1 w-full" required min={0} />
       </label>
-      <label className="font-semibold">Stock
+      <label className="font-semibold flex flex-col gap-1">Stock
         <input name="stock" type="number" value={form.stock} onChange={handleChange} className="border rounded px-2 py-1 w-full" required min={0} />
       </label>
       <label className="font-semibold">Categoría
-        <select name="category" value={form.category} onChange={handleChange} className="border rounded px-2 py-1 w-full" required>
+        <select
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          className="border rounded px-2 py-1 w-full"
+          required
+        >
           <option value="juguetes_perro">Juguete para perro</option>
           <option value="juguetes_gato">Juguete para gato</option>
         </select>
       </label>
-      <label className="font-semibold">URL de imagen
-        <input name="imageUrl" value={form.imageUrl} onChange={handleChange} className="border rounded px-2 py-1 w-full" />
+      <label className="font-semibold flex flex-col gap-1">URL de imagen 1
+        <input name="imageUrl1" value={form.imageUrl1} onChange={handleChange} className="border rounded px-2 py-1 w-full" placeholder="https://..." />
+      </label>
+      <label className="font-semibold flex flex-col gap-1">URL de imagen 2
+        <input name="imageUrl2" value={form.imageUrl2} onChange={handleChange} className="border rounded px-2 py-1 w-full" placeholder="https://..." />
+      </label>
+      <label className="font-semibold flex flex-col gap-1">URL de imagen 3
+        <input name="imageUrl3" value={form.imageUrl3} onChange={handleChange} className="border rounded px-2 py-1 w-full" placeholder="https://..." />
+      </label>
+      <label className="font-semibold flex flex-col gap-1">URL de video (opcional)
+        <input name="videoUrl" value={form.videoUrl} onChange={handleChange} className="border rounded px-2 py-1 w-full" placeholder="https://..." />
       </label>
       {error && <p className="text-red-600">{error}</p>}
-      <div className="flex gap-2 mt-2">
-        <button type="submit" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
-        <button type="button" className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300" onClick={onClose}>Cancelar</button>
+      <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
+        <button type="submit" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 w-full sm:w-auto" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
+        <button type="button" className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 w-full sm:w-auto" onClick={onClose}>Cancelar</button>
       </div>
     </form>
   );

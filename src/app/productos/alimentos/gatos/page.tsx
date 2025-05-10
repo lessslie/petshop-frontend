@@ -3,6 +3,9 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';  
 
 interface Product {
   id: string;
@@ -11,8 +14,8 @@ interface Product {
   price: number;
   stock: number;
   category: string;
-  imageUrl?: string;
-  images?: string[];
+  imageUrl?: string[];
+  videoUrl?: string;
 }
 
 export default function AlimentosGatosPage() {
@@ -62,9 +65,30 @@ export default function AlimentosGatosPage() {
             key={prod.id}
             className="bg-white rounded-xl shadow-md border border-gray-200 flex flex-col items-center p-4 sm:p-6 hover:shadow-lg transition min-w-[200px] max-w-xs mx-auto w-full overflow-hidden"
           >
-            <div className="mb-3 w-full h-32 relative flex items-center justify-center">
+            <div className="mb-3 w-full h-40 relative flex items-center justify-center">
               {prod.imageUrl ? (
-                <Image src={prod.imageUrl} alt={prod.name} fill className="object-contain rounded-lg" sizes="(max-width: 768px) 100vw, 33vw" />
+                Array.isArray(prod.imageUrl) && prod.imageUrl.length > 1 ? (
+                  <Slider
+                    dots={true}
+                    infinite={true}
+                    speed={500}
+                    slidesToShow={1}
+                    slidesToScroll={1}
+                    autoplay={true}
+                    autoplaySpeed={3000}
+                    className="w-full h-40"
+                  >
+                    {prod.imageUrl.map((img: string, idx: number) => (
+                      <div key={idx} className="w-full h-40 flex items-center justify-center relative">
+                        <Image src={img} alt={prod.name + ' ' + (idx + 1)} fill className="object-contain rounded-lg" sizes="(max-width: 768px) 100vw, 33vw" />
+                      </div>
+                    ))}
+                  </Slider>
+                ) : (
+                  <div className="w-full h-40 relative">
+                    <Image src={Array.isArray(prod.imageUrl) ? prod.imageUrl[0] : prod.imageUrl} alt={prod.name} fill className="object-contain rounded-lg" sizes="(max-width: 768px) 100vw, 33vw" />
+                  </div>
+                )
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">Sin imagen</div>
               )}
