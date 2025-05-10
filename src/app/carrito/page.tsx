@@ -2,12 +2,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 interface CartItem {
   id: string;
   name: string;
   price: number;
-  imageUrl?: string;
+  imageUrl?: string | string[];
   quantity: number;
 }
 
@@ -48,6 +49,26 @@ export default function CarritoPage() {
     toast.success("Carrito vaciado");
   };
 
+  // Función para obtener la primera imagen válida
+  const getProductImage = (imageUrl?: string | string[]): string => {
+    if (!imageUrl) return '';
+    
+    if (Array.isArray(imageUrl)) {
+      const validImage = imageUrl.find(img => 
+        typeof img === 'string' && 
+        img.trim() !== '' && 
+        !img.includes('/admin/')
+      );
+      return validImage || '';
+    }
+    
+    if (typeof imageUrl === 'string' && imageUrl.trim() !== '' && !imageUrl.includes('/admin/')) {
+      return imageUrl;
+    }
+    
+    return '';
+  };
+
   const handleCheckout = async () => {
     // Aquí podrías pedir datos del usuario, dirección, etc.
     const token = localStorage.getItem("token");
@@ -61,7 +82,7 @@ export default function CarritoPage() {
         productId: id,
         quantity,
         price,
-        image: imageUrl || ""
+        image: getProductImage(imageUrl)
       }));
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders`, {
         method: "POST",
@@ -108,6 +129,22 @@ export default function CarritoPage() {
           </button>
           {cart.map((item) => (
             <div key={item.id} className="flex items-center gap-4 border-b border-gray-100 py-4 last:border-b-0">
+              {/* Imagen de vista previa */}
+              <div className="w-20 h-20 relative flex-shrink-0">
+                {getProductImage(item.imageUrl) ? (
+                  <Image
+                    src={getProductImage(item.imageUrl)}
+                    alt={item.name}
+                    fill
+                    className="object-cover rounded-md"
+                    sizes="80px"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md text-gray-400">
+                    Sin imagen
+                  </div>
+                )}
+              </div>
 
               <div className="flex-1">
                 <div className="font-semibold text-gray-800">{item.name}</div>
