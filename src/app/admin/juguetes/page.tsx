@@ -99,9 +99,9 @@ export default function AdminJuguetes() {
         </div>
       )}
       {loading && <p>Cargando...</p>}
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         {productos.map(prod => (
-          <div key={prod.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col sm:flex-row items-center gap-4">
+          <div key={prod.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center gap-4 w-full">
             <div className="flex gap-2 items-center">
               {Array.isArray(prod.imageUrl) && prod.imageUrl.length > 0 ? (
                 <Image
@@ -121,12 +121,12 @@ export default function AdminJuguetes() {
                 </video>
               )}
             </div>
-            <div className="flex-1 w-full flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
-              <div className="font-semibold text-fuchsia-700">{prod.name}</div>
+            <div className="flex-1 w-full flex flex-col gap-2 items-center md:items-start">
+              <div className="font-semibold text-fuchsia-700 w-full text-center md:text-left truncate">{prod.name}</div>
               <div className="text-gray-700">${prod.price.toLocaleString()}</div>
               <div className="text-gray-500 text-sm">Stock: {prod.stock}</div>
             </div>
-            <div className="flex gap-2 mt-2 sm:mt-0">
+            <div className="flex gap-2 mt-2 w-full justify-center md:justify-start">
               <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" onClick={() => handleEdit(prod)}>Editar</button>
               <button className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" onClick={() => handleDelete(prod.id)}>Eliminar</button>
             </div>

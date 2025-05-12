@@ -113,12 +113,12 @@ export default function AdminTurnos() {
         setMensaje("Turno eliminado correctamente.");
         setTimeout(() => setMensaje(""), 2500);
       } else {
-        setMensaje("Error al eliminar el turno.");
-        setTimeout(() => setMensaje(""), 2500);
+        setError("Error al eliminar el turno.");
+        setTimeout(() => setError(""), 2500);
       }
-    } catch {
-      setMensaje("Error de red al eliminar el turno.");
-      setTimeout(() => setMensaje(""), 2500);
+    } catch (error) {
+      setError("Error de red al eliminar el turno.");
+      setTimeout(() => setError(""), 2500);
     }
   };
 
@@ -134,18 +134,18 @@ export default function AdminTurnos() {
   };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setEditForm((prev) => ({ ...prev, [name]: value }));
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!turnoEditando) return;
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/turnos/${turnoEditando.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
@@ -156,20 +156,20 @@ export default function AdminTurnos() {
           serviceType: editForm.serviceType,
         }),
       });
+
       if (res.ok) {
-        const updated = await res.json();
-        setTurnos((prev) => prev.map((t) => t.id === updated.id ? { ...t, ...updated } : t));
-        setMensaje('Turno actualizado correctamente. Se notificará al cliente por email.');
-        alert('¡Turno editado exitosamente! Se notificará al cliente por email.');
-        setTimeout(() => setMensaje(''), 2500);
+        const updatedTurno = await res.json();
+        setTurnos(turnos.map(t => t.id === updatedTurno.id ? updatedTurno : t));
         setTurnoEditando(null);
+        setMensaje("Turno actualizado correctamente.");
+        setTimeout(() => setMensaje(""), 2500);
       } else {
-        setMensaje('Error al actualizar el turno.');
-        setTimeout(() => setMensaje(''), 2500);
+        setError("Error al actualizar el turno.");
+        setTimeout(() => setError(""), 2500);
       }
-    } catch {
-      setMensaje('Error de red al actualizar el turno.');
-      setTimeout(() => setMensaje(''), 2500);
+    } catch (error) {
+      setError("Error de red al actualizar el turno.");
+      setTimeout(() => setError(""), 2500);
     }
   };
 
@@ -192,22 +192,24 @@ export default function AdminTurnos() {
         <p>Cargando turnos...</p>
       ) : (
         // Grid responsive: 1 columna en mobile, 2 columnas desde md+
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {turnosPagina.length === 0 ? (
             <div className="text-center text-gray-600 col-span-full">No hay turnos para mostrar.</div>
           ) : (
             turnosPagina.map((turno) => (
-              <div key={turno.id} className="bg-white rounded-xl shadow p-4 border border-gray-200 w-full max-w-md text-center">
-                <div className="mb-1"><span className="font-semibold">Cliente:</span> {turno.userName}</div>
-                <div className="mb-1"><span className="font-semibold">Email:</span> {turno.email}</div>
-                <div className="mb-1"><span className="font-semibold">Mascota:</span> {turno.dogName}</div>
-                <div className="mb-1"><span className="font-semibold">Fecha:</span> {turno.date}</div>
-                <div className="mb-1"><span className="font-semibold">Hora:</span> {turno.time}</div>
-                <div className="mb-1"><span className="font-semibold">Tamaño:</span> {turno.dogSize}</div>
-                <div className="mb-1"><span className="font-semibold">Servicio:</span> {turno.serviceType}</div>
-                <div className="mb-1"><span className="font-semibold">Precio:</span> ${turno.price}</div>
-                <div className="mb-1"><span className="font-semibold">Estado de pago:</span> {turno.paymentStatus}</div>
-                <div className="flex gap-2 mt-2 flex-wrap justify-center">
+              <div key={turno.id} className="bg-white rounded-xl shadow p-4 border border-gray-200 w-full flex flex-col items-center gap-4">
+                <div className="w-full flex flex-col gap-1 items-center md:items-start">
+                  <div className="mb-1"><span className="font-semibold">Cliente:</span> {turno.userName}</div>
+                  <div className="mb-1 w-full overflow-hidden"><span className="font-semibold">Email:</span> <span className="break-words overflow-ellipsis">{turno.email}</span></div>
+                  <div className="mb-1"><span className="font-semibold">Mascota:</span> {turno.dogName}</div>
+                  <div className="mb-1"><span className="font-semibold">Fecha:</span> {turno.date}</div>
+                  <div className="mb-1"><span className="font-semibold">Hora:</span> {turno.time}</div>
+                  <div className="mb-1"><span className="font-semibold">Tamaño:</span> {turno.dogSize}</div>
+                  <div className="mb-1"><span className="font-semibold">Servicio:</span> {turno.serviceType}</div>
+                  <div className="mb-1"><span className="font-semibold">Precio:</span> ${turno.price}</div>
+                  <div className="mb-1"><span className="font-semibold">Estado de pago:</span> {turno.paymentStatus}</div>
+                </div>
+                <div className="flex gap-2 mt-2 w-full justify-center md:justify-center">
                   <button onClick={() => handleEditarTurno(turno)} className="bg-teal-600 hover:bg-teal-700 text-white py-1 px-3 rounded text-sm">Editar</button>
                   <button onClick={() => eliminarTurno(turno.id)} className="bg-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded text-sm">Eliminar</button>
                   <button onClick={() => setClienteSeleccionado(turno)} className="bg-gray-300 hover:bg-gray-400 text-gray-900 py-1 px-3 rounded text-sm">Ver Cliente</button>
@@ -220,21 +222,38 @@ export default function AdminTurnos() {
       {/* --- PAGINACIÓN: botones debajo de las tarjetas --- */}
       <div className="flex justify-center mt-6 gap-2 flex-wrap">
         <button
-          onClick={() => setPagina((p) => Math.max(1, p - 1))}
+          onClick={() => setPagina(1)}
           disabled={pagina === 1}
-          className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
-        >Anterior</button>
-        {Array.from({ length: totalPaginas }, (_, i) => (
-          <button
-            key={i}
-            onClick={() => setPagina(i + 1)}
-            className={`px-3 py-1 rounded ${pagina === i + 1 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`}
-          >{i + 1}</button>
-        ))}
+          className={`px-3 py-1 rounded ${
+            pagina === 1
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-teal-600 text-white hover:bg-teal-700"
+          }`}
+        >
+          Primero
+        </button>
         <button
-          onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-          disabled={pagina === totalPaginas}
-          className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+          onClick={() => setPagina(p => Math.max(1, p - 1))}
+          disabled={pagina === 1}
+          className={`px-3 py-1 rounded ${
+            pagina === 1
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-teal-600 text-white hover:bg-teal-700"
+          }`}
+        >
+          Anterior
+        </button>
+        <span className="px-3 py-1 bg-gray-100 rounded">
+          {pagina} de {totalPaginas || 1}
+        </span>
+        <button
+          onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
+          disabled={pagina === totalPaginas || totalPaginas === 0}
+          className={`px-3 py-1 rounded ${
+            pagina === totalPaginas || totalPaginas === 0
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-teal-600 text-white hover:bg-teal-700"
+          }`}
         >Siguiente</button>
       </div>
       {clienteSeleccionado && (

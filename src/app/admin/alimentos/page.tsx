@@ -110,9 +110,9 @@ export default function AdminAlimentos() {
       <div className="overflow-x-auto flex flex-col gap-10">
         <div>
           <h2 className="text-xl font-bold mb-2 text-teal-700">Alimentos para Perro</h2>
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             {productosPerro.map(prod => (
-              <div key={prod.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col sm:flex-row items-center gap-4">
+              <div key={prod.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center gap-4 w-full">
                 <div className="flex gap-2 items-center">
                   {prod.imageUrl && prod.imageUrl.slice(0, 1).map((img: string, idx: number) => (
                     <Image
@@ -125,12 +125,12 @@ export default function AdminAlimentos() {
                     />
                   ))}
                 </div>
-                <div className="flex-1 w-full flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
-                  <div className="font-semibold text-teal-700">{prod.name}</div>
+                <div className="flex-1 w-full flex flex-col gap-2 items-center md:items-start">
+                  <div className="font-semibold text-teal-700 w-full text-center md:text-left truncate">{prod.name}</div>
                   <div className="text-gray-700">${prod.price.toLocaleString()}</div>
                   <div className="text-gray-500 text-sm">Stock: {prod.stock}</div>
                 </div>
-                <div className="flex gap-2 mt-2 sm:mt-0">
+                <div className="flex gap-2 mt-2 w-full justify-center md:justify-center">
                   <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" onClick={() => handleEdit(prod)}>Editar</button>
                   <button className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" onClick={() => handleDelete(prod.id)}>Eliminar</button>
                 </div>
@@ -140,9 +140,9 @@ export default function AdminAlimentos() {
         </div>
         <div>
           <h2 className="text-xl font-bold mb-2 text-fuchsia-700">Alimentos para Gato</h2>
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             {productosGato.map(prod => (
-              <div key={prod.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col sm:flex-row items-center gap-4">
+              <div key={prod.id} className="bg-white rounded-xl shadow-md p-4 flex flex-col items-center gap-4 w-full">
                 <div className="flex gap-2 items-center">
                   {prod.imageUrl && prod.imageUrl.slice(0, 1).map((img: string, idx: number) => (
                     <Image
@@ -155,46 +155,47 @@ export default function AdminAlimentos() {
                     />
                   ))}
                 </div>
-                <div className="flex-1 w-full flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
-                  <div className="font-semibold text-fuchsia-700">{prod.name}</div>
+                <div className="flex-1 w-full flex flex-col gap-2 items-center md:items-start">
+                  <div className="font-semibold text-fuchsia-700 w-full text-center md:text-left truncate">{prod.name}</div>
                   <div className="text-gray-700">${prod.price.toLocaleString()}</div>
                   <div className="text-gray-500 text-sm">Stock: {prod.stock}</div>
                 </div>
-                <div className="flex gap-2 mt-2 sm:mt-0">
+                <div className="flex gap-2 mt-2 w-full justify-center md:justify-start">
                   <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" onClick={() => handleEdit(prod)}>Editar</button>
                   <button className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200" onClick={() => handleDelete(prod.id)}>Eliminar</button>
                 </div>
               </div>
             ))}
           </div>
-      </div>
+        </div>
       </div>
       {/* Modal para editar/agregar producto */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-md mx-2 sm:mx-4 md:mx-0">
-            <ProductForm
+            <h2 className="text-xl font-bold mb-4">{editing ? 'Editar alimento' : 'Agregar alimento'}</h2>
+            <ProductForm 
               initial={editing}
               onClose={handleModalClose}
               onSaved={(prod, isEdit) => {
                 setModalOpen(false);
                 setEditing(undefined);
-                if (prod.category === 'alimento_perro') {
-                  if (isEdit) {
-                    setProductosPerro(prev => prev.map((p: Product) => p.id === prod.id ? prod : p));
-                    setSuccessMsg('Producto editado correctamente');
+                if (isEdit) {
+                  // Actualizar en el estado correcto según la categoría
+                  if (prod.category === 'alimento_perro') {
+                    setProductosPerro(prev => prev.map(p => p.id === prod.id ? prod : p));
                   } else {
-                    setProductosPerro(prev => [prod, ...prev]);
-                    setSuccessMsg('Producto creado correctamente');
+                    setProductosGato(prev => prev.map(p => p.id === prod.id ? prod : p));
                   }
-                } else if (prod.category === 'alimento_gato') {
-                  if (isEdit) {
-                    setProductosGato(prev => prev.map((p: Product) => p.id === prod.id ? prod : p));
-                    setSuccessMsg('Producto editado correctamente');
+                  setSuccessMsg('Alimento editado correctamente');
+                } else {
+                  // Agregar al estado correcto según la categoría
+                  if (prod.category === 'alimento_perro') {
+                    setProductosPerro(prev => [prod, ...prev]);
                   } else {
                     setProductosGato(prev => [prod, ...prev]);
-                    setSuccessMsg('Producto creado correctamente');
                   }
+                  setSuccessMsg('Alimento creado correctamente');
                 }
               }}
             />
@@ -215,16 +216,16 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
   const [form, setForm] = useState({
     name: initial?.name || '',
     description: initial?.description || '',
-    price: initial?.price || '',
-    stock: initial?.stock || '',
-    imageUrl1: initial?.imageUrl?.[0] || '',
-    imageUrl2: initial?.imageUrl?.[1] || '',
-    imageUrl3: initial?.imageUrl?.[2] || '',
-    videoUrl: initial?.videoUrl || '',
+    price: initial?.price || 0,
+    stock: initial?.stock || 0,
     category: initial?.category || 'alimento_perro',
+    imageUrl1: initial?.imageUrl && initial.imageUrl[0] ? initial.imageUrl[0] : '',
+    imageUrl2: initial?.imageUrl && initial.imageUrl[1] ? initial.imageUrl[1] : '',
+    imageUrl3: initial?.imageUrl && initial.imageUrl[2] ? initial.imageUrl[2] : '',
+    videoUrl: initial?.videoUrl || '',
   });
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   function getToken() {
     if (typeof window !== 'undefined') {
@@ -233,20 +234,17 @@ function ProductForm({ initial, onClose, onSaved }: ProductFormProps) {
     return null;
   }
 
-  useEffect(() => {
-    if (!saving) setError('');
-  }, [saving]);
-
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-    setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
-    setError('');
     try {
+      setSaving(true);
+      setError('');
       const token = getToken();
+      if (!token) throw new Error('No estás autenticado');
       const method = initial ? 'PUT' : 'POST';
       const url = initial ? `${process.env.NEXT_PUBLIC_API_URL}/products/${initial.id}` : `${process.env.NEXT_PUBLIC_API_URL}/products`;
       // Juntar las imágenes en un array y filtrar vacíos
