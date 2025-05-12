@@ -116,7 +116,7 @@ export default function AdminTurnos() {
         setError("Error al eliminar el turno.");
         setTimeout(() => setError(""), 2500);
       }
-    } catch (error) {
+    } catch {
       setError("Error de red al eliminar el turno.");
       setTimeout(() => setError(""), 2500);
     }
@@ -167,7 +167,7 @@ export default function AdminTurnos() {
         setError("Error al actualizar el turno.");
         setTimeout(() => setError(""), 2500);
       }
-    } catch (error) {
+    } catch {
       setError("Error de red al actualizar el turno.");
       setTimeout(() => setError(""), 2500);
     }
